@@ -811,12 +811,6 @@ export const LandingPage: React.FC = () => {
 
             <section className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center py-8">
               <div>
-                <div className="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm border border-emerald-200/60 rounded-full px-3 py-1.5 mb-5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  <span className="text-xs font-semibold text-emerald-700">
-                    Now with offline support
-                  </span>
-                </div>
 
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.05] tracking-tight">
                   Track the skills and habits that{' '}
