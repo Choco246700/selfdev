@@ -126,7 +126,7 @@ const MiniHeatmap: React.FC = () => {
       {cells.map((level, i) => (
         <div
           key={i}
-          className="w-2 h-2 rounded-[2px]"
+          className="w-2 h-2 rounded-xs"
           style={{ backgroundColor: colors[level] }}
         />
       ))}
@@ -524,7 +524,7 @@ const FEATURES = [
 ];
 
 const Features: React.FC = () => (
-  <section className="relative py-16 md:py-24 overflow-hidden min-h-[700px]">
+  <section className="relative py-16 md:py-24 overflow-hidden min-h-175">
     {/* Soft veil so the icons read against a calmer base */}
     
 
@@ -609,7 +609,7 @@ const HowItWorks: React.FC = () => (
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
       <div
-        className="hidden md:block absolute top-12 left-16 right-16 h-px bg-gradient-to-r from-emerald-200 via-emerald-300 to-emerald-200"
+        className="hidden md:block absolute top-12 left-16 right-16 h-px bg-linear-to-r from-emerald-200 via-emerald-300 to-emerald-200"
         aria-hidden="true"
       />
 
@@ -639,7 +639,7 @@ const HowItWorks: React.FC = () => (
 
 const FinalCTA: React.FC = () => (
   <section className="py-16 md:py-24">
-    <div className="relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-3xl shadow-2xl overflow-hidden">
+    <div className="relative bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-3xl shadow-2xl overflow-hidden">
       <div
         className="absolute inset-0 opacity-30"
         style={{
@@ -806,7 +806,7 @@ export const LandingPage: React.FC = () => {
       <div className="min-h-screen font-sans">
         <div className="max-w-6xl mx-auto px-6 md:px-8">
           {/* ═══ HERO — fills the viewport ═══ */}
-          <div className="min-h-[100svh] flex flex-col">
+          <div className="min-h-svh flex flex-col">
             <LandingNav />
 
             <section className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center py-8">
@@ -820,7 +820,7 @@ export const LandingPage: React.FC = () => {
 
                 <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.05] tracking-tight">
                   Track the skills and habits that{' '}
-                  <span className="bg-gradient-to-br from-emerald-500 to-teal-600 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-br from-emerald-500 to-teal-600 bg-clip-text text-transparent">
                     actually
                   </span>{' '}
                   stick.
