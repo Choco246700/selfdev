@@ -1,15 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from "react";
+import { Link } from "react-router-dom";
 import {
   Sparkles,
-  ArrowRight,
   Check,
-  TrendingUp,
   Flame,
-  BarChart3,
-  Bell,
-  WifiOff,
-  Download,
   Trophy,
   Target,
   Music,
@@ -36,15 +30,15 @@ import {
   CloudRain,
   Menu,
   X,
-} from 'lucide-react';
+} from "lucide-react";
 
 // ─── Material Design 3 button ───────────────────────────────────────
-type ButtonVariant = 'filled' | 'outlined' | 'text';
+type ButtonVariant = "filled" | "outlined" | "text";
 
 interface MaterialButtonProps {
   to: string;
   variant?: ButtonVariant;
-  size?: 'sm' | 'md' | 'lg';
+  size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   className?: string;
   icon?: React.ReactNode;
@@ -53,39 +47,39 @@ interface MaterialButtonProps {
 
 const MaterialButton: React.FC<MaterialButtonProps> = ({
   to,
-  variant = 'filled',
-  size = 'md',
+  variant = "filled",
+  size = "md",
   children,
-  className = '',
+  className = "",
   icon,
   trailingIcon,
 }) => {
   const sizeClasses = {
-    sm: 'h-9 px-4 text-xs',
-    md: 'h-10 px-5 text-sm',
-    lg: 'h-12 px-6 text-base',
+    sm: "h-9 px-4 text-xs",
+    md: "h-10 px-5 text-sm",
+    lg: "h-12 px-6 text-base",
   }[size];
 
   const variantClasses = {
     filled: [
-      'bg-[#1c1b1f] text-white',
-      'shadow-[0_1px_2px_0_rgba(0,0,0,0.14),0_1px_3px_0_rgba(0,0,0,0.12)]',
-      'hover:bg-[#2a2a2e]',
-      'hover:shadow-[0_2px_4px_0_rgba(0,0,0,0.16),0_3px_6px_0_rgba(0,0,0,0.14)]',
-      'active:bg-[#141316]',
-      'active:shadow-[0_1px_2px_0_rgba(0,0,0,0.14)]',
-    ].join(' '),
+      "bg-[#1c1b1f] text-white",
+      "shadow-[0_1px_2px_0_rgba(0,0,0,0.14),0_1px_3px_0_rgba(0,0,0,0.12)]",
+      "hover:bg-[#2a2a2e]",
+      "hover:shadow-[0_2px_4px_0_rgba(0,0,0,0.16),0_3px_6px_0_rgba(0,0,0,0.14)]",
+      "active:bg-[#141316]",
+      "active:shadow-[0_1px_2px_0_rgba(0,0,0,0.14)]",
+    ].join(" "),
     outlined: [
-      'bg-transparent text-[#1c1b1f]',
-      'border border-[#79747E]/70',
-      'hover:bg-[#1c1b1f]/[0.06]',
-      'active:bg-[#1c1b1f]/[0.12]',
-    ].join(' '),
+      "bg-transparent text-[#1c1b1f]",
+      "border border-[#79747E]/70",
+      "hover:bg-[#1c1b1f]/[0.06]",
+      "active:bg-[#1c1b1f]/[0.12]",
+    ].join(" "),
     text: [
-      'bg-transparent text-[#1c1b1f]',
-      'hover:bg-[#1c1b1f]/[0.06]',
-      'active:bg-[#1c1b1f]/[0.12]',
-    ].join(' '),
+      "bg-transparent text-[#1c1b1f]",
+      "hover:bg-[#1c1b1f]/[0.06]",
+      "active:bg-[#1c1b1f]/[0.12]",
+    ].join(" "),
   }[variant];
 
   const baseClasses = `inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-[0.015em] transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1c1b1f]/40 focus-visible:ring-offset-2 ${sizeClasses} ${variantClasses} ${className}`;
@@ -98,7 +92,7 @@ const MaterialButton: React.FC<MaterialButtonProps> = ({
     </>
   );
 
-  if (to.startsWith('#')) {
+  if (to.startsWith("#")) {
     return (
       <a href={to} className={baseClasses}>
         {inner}
@@ -194,7 +188,7 @@ const MiniHeatmap: React.FC = () => {
     0, 1, 4, 3, 2, 1, 0, 3, 2, 1, 0, 3, 1, 4, 2, 3, 0, 1, 2, 4, 3, 1, 0, 2, 1,
     3,
   ];
-  const colors = ['#f3f4f6', '#d1fae5', '#6ee7b7', '#10b981', '#047857'];
+  const colors = ["#f3f4f6", "#d1fae5", "#6ee7b7", "#10b981", "#047857"];
 
   return (
     <div className="grid grid-rows-7 grid-flow-col gap-1.5">
@@ -236,12 +230,7 @@ const HeroMockup: React.FC = () => (
           hours="47.5h"
           streak={12}
         />
-        <MiniSkillRow
-          color="#8b5cf6"
-          name="Guitar"
-          hours="32h"
-          streak={8}
-        />
+        <MiniSkillRow color="#8b5cf6" name="Guitar" hours="32h" streak={8} />
         <MiniSkillRow
           color="#3b82f6"
           name="TypeScript"
@@ -277,8 +266,8 @@ const PendulumMockup: React.FC = () => {
 
   useEffect(() => {
     if (
-      typeof window !== 'undefined' &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
       setReducedMotion(true);
       setTriggered(true);
@@ -297,7 +286,7 @@ const PendulumMockup: React.FC = () => {
           observer.disconnect();
         }
       },
-      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+      { threshold: 0.15, rootMargin: "0px 0px -60px 0px" },
     );
 
     observer.observe(el);
@@ -307,29 +296,28 @@ const PendulumMockup: React.FC = () => {
   const dropStyle: React.CSSProperties = reducedMotion
     ? {}
     : {
-        animation:
-          'drop-in 1.15s cubic-bezier(0.34, 1.15, 0.64, 1) forwards',
-        animationPlayState: triggered ? 'running' : 'paused',
+        animation: "drop-in 1.15s cubic-bezier(0.34, 1.15, 0.64, 1) forwards",
+        animationPlayState: triggered ? "running" : "paused",
       };
 
   const swingStyle: React.CSSProperties = reducedMotion
     ? {}
     : {
-        transformOrigin: 'top center',
+        transformOrigin: "top center",
         animation:
-          'pendulum-swing 5s cubic-bezier(0.42, 0, 0.58, 1) 1.15s forwards',
-        animationPlayState: triggered ? 'running' : 'paused',
+          "pendulum-swing 5s cubic-bezier(0.42, 0, 0.58, 1) 1.15s forwards",
+        animationPlayState: triggered ? "running" : "paused",
       };
 
   return (
     <div ref={ref} className="relative flex flex-col items-center">
       <div className="relative z-10">
-        <div className="w-3 h-3 rounded-full bg-gradient-to-b from-gray-300 to-gray-500 shadow-[0_1px_2px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.7)]" />
+        <div className="w-3 h-3 rounded-full bg-linear-to-b from-gray-300 to-gray-500 shadow-[0_1px_2px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.7)]" />
       </div>
 
       <div data-drop className="w-full" style={dropStyle}>
         <div data-pendulum className="w-full" style={swingStyle}>
-          <div className="mx-auto w-[2px] h-24 md:h-32 bg-gradient-to-b from-gray-500/70 via-gray-500/40 to-gray-400/15 rounded-full" />
+          <div className="mx-auto w-0.5 h-24 md:h-32 bg-linear-to-b from-gray-500/70 via-gray-500/40 to-gray-400/15 rounded-full" />
 
           <div className="mt-2">
             <HeroMockup />
@@ -343,10 +331,10 @@ const PendulumMockup: React.FC = () => {
 // ─── Navigation ─────────────────────────────────────────────────────
 
 const NAV_LINKS = [
-  { label: 'Features', href: '#features' },
-  { label: 'How it works', href: '#how-it-works' },
-//   { label: 'Pricing', href: '#pricing' },
-//   { label: 'About', href: '#about' },
+  { label: "Features", href: "#features" },
+  { label: "How it works", href: "#how-it-works" },
+  //   { label: 'Pricing', href: '#pricing' },
+  //   { label: 'About', href: '#about' },
 ];
 
 const LandingNav: React.FC = () => {
@@ -445,188 +433,188 @@ interface SkillIconDef {
 const SKILL_ICONS: SkillIconDef[] = [
   {
     Icon: Music,
-    position: { top: '3%', left: '8%', transform: 'rotate(-12deg)' },
+    position: { top: "3%", left: "8%", transform: "rotate(-12deg)" },
     size: 52,
-    color: '#5E7A66',
-    animation: 'sway',
+    color: "#5E7A66",
+    animation: "sway",
     duration: 4,
   },
   {
     Icon: Languages,
-    position: { top: '8%', left: '33%' },
+    position: { top: "8%", left: "33%" },
     size: 60,
-    color: '#736A95',
-    animation: 'speak',
+    color: "#736A95",
+    animation: "speak",
     duration: 3.5,
     delay: 0.5,
   },
   {
     Icon: Camera,
-    position: { top: '2%', left: '58%', transform: 'rotate(9deg)' },
+    position: { top: "2%", left: "58%", transform: "rotate(9deg)" },
     size: 44,
-    color: '#9E6A64',
-    animation: 'flash',
+    color: "#9E6A64",
+    animation: "flash",
     duration: 5,
     delay: 1.2,
   },
   {
     Icon: Mountain,
-    position: { top: '6%', left: '86%' },
+    position: { top: "6%", left: "86%" },
     size: 56,
-    color: '#4E8D85',
-    animation: 'rise',
+    color: "#4E8D85",
+    animation: "rise",
     duration: 6,
   },
   {
     Icon: Code2,
-    position: { top: '20%', left: '3%', transform: 'rotate(-18deg)' },
+    position: { top: "20%", left: "3%", transform: "rotate(-18deg)" },
     size: 38,
-    color: '#5A7891',
-    animation: 'jitter',
+    color: "#5A7891",
+    animation: "jitter",
     duration: 2.4,
   },
   {
     Icon: Brain,
-    position: { top: '26%', left: '19%' },
+    position: { top: "26%", left: "19%" },
     size: 34,
-    color: '#736A95',
-    animation: 'think',
+    color: "#736A95",
+    animation: "think",
     duration: 5,
     delay: 0.8,
   },
   {
     Icon: Palette,
-    position: { top: '19%', left: '45%', transform: 'rotate(6deg)' },
+    position: { top: "19%", left: "45%", transform: "rotate(6deg)" },
     size: 64,
-    color: '#9E6A64',
-    animation: 'mix',
+    color: "#9E6A64",
+    animation: "mix",
     duration: 7,
   },
   {
     Icon: Mic,
-    position: { top: '28%', left: '72%' },
+    position: { top: "28%", left: "72%" },
     size: 46,
-    color: '#736A95',
-    animation: 'broadcast',
+    color: "#736A95",
+    animation: "broadcast",
     duration: 2.8,
     delay: 0.3,
   },
   {
     Icon: Zap,
-    position: { top: '22%', left: '93%', transform: 'rotate(-14deg)' },
+    position: { top: "22%", left: "93%", transform: "rotate(-14deg)" },
     size: 32,
-    color: '#94794E',
-    animation: 'spark',
+    color: "#94794E",
+    animation: "spark",
     duration: 4,
     delay: 2,
   },
   {
     Icon: BookOpen,
-    position: { top: '42%', left: '1%' },
+    position: { top: "42%", left: "1%" },
     size: 48,
-    color: '#94794E',
-    animation: 'open',
+    color: "#94794E",
+    animation: "open",
     duration: 4.2,
   },
   {
     Icon: Leaf,
-    position: { top: '55%', left: '12%', transform: 'rotate(-28deg)' },
+    position: { top: "55%", left: "12%", transform: "rotate(-28deg)" },
     size: 38,
-    color: '#5E7A66',
-    animation: 'rustle',
+    color: "#5E7A66",
+    animation: "rustle",
     duration: 5.5,
     delay: 1,
   },
   {
     Icon: Bike,
-    position: { top: '48%', left: '95%', transform: 'rotate(8deg)' },
+    position: { top: "48%", left: "95%", transform: "rotate(8deg)" },
     size: 58,
-    color: '#4E8D85',
-    animation: 'coast',
+    color: "#4E8D85",
+    animation: "coast",
     duration: 3.2,
   },
   {
     Icon: CloudRain,
-    position: { top: '58%', left: '82%' },
+    position: { top: "58%", left: "82%" },
     size: 56,
-    color: '#4E8D85',
-    animation: 'rain',
+    color: "#4E8D85",
+    animation: "rain",
     duration: 3.8,
   },
   {
     Icon: Footprints,
-    position: { top: '68%', left: '6%', transform: 'rotate(20deg)' },
+    position: { top: "68%", left: "6%", transform: "rotate(20deg)" },
     size: 42,
-    color: '#5E7A66',
-    animation: 'step',
+    color: "#5E7A66",
+    animation: "step",
     duration: 3.6,
     delay: 0.4,
   },
   {
     Icon: Heart,
-    position: { top: '74%', left: '24%' },
+    position: { top: "74%", left: "24%" },
     size: 36,
-    color: '#9E6A64',
-    animation: 'heartbeat',
+    color: "#9E6A64",
+    animation: "heartbeat",
     duration: 2.2,
   },
   {
     Icon: Coffee,
-    position: { top: '70%', left: '48%', transform: 'rotate(-10deg)' },
+    position: { top: "70%", left: "48%", transform: "rotate(-10deg)" },
     size: 40,
-    color: '#94794E',
-    animation: 'steam',
+    color: "#94794E",
+    animation: "steam",
     duration: 3.4,
     delay: 1.5,
   },
   {
     Icon: PenTool,
-    position: { top: '78%', left: '68%', transform: 'rotate(12deg)' },
+    position: { top: "78%", left: "68%", transform: "rotate(12deg)" },
     size: 36,
-    color: '#5A7891',
-    animation: 'write',
+    color: "#5A7891",
+    animation: "write",
     duration: 2.6,
   },
   {
     Icon: Dumbbell,
-    position: { top: '66%', left: '88%' },
+    position: { top: "66%", left: "88%" },
     size: 52,
-    color: '#5A7891',
-    animation: 'pump',
+    color: "#5A7891",
+    animation: "pump",
     duration: 1.8,
   },
   {
     Icon: Plane,
-    position: { top: '88%', left: '14%' },
+    position: { top: "88%", left: "14%" },
     size: 54,
-    color: '#736A95',
-    animation: 'fly',
+    color: "#736A95",
+    animation: "fly",
     duration: 14,
     delay: 2,
   },
   {
     Icon: Flower,
-    position: { top: '92%', left: '40%' },
+    position: { top: "92%", left: "40%" },
     size: 42,
-    color: '#5E7A66',
-    animation: 'bloom',
+    color: "#5E7A66",
+    animation: "bloom",
     duration: 5,
     delay: 0.8,
   },
   {
     Icon: Sun,
-    position: { top: '86%', left: '62%', transform: 'rotate(15deg)' },
+    position: { top: "86%", left: "62%", transform: "rotate(15deg)" },
     size: 50,
-    color: '#94794E',
-    animation: 'spin',
+    color: "#94794E",
+    animation: "spin",
     duration: 18,
   },
   {
     Icon: ChefHat,
-    position: { top: '90%', left: '83%' },
+    position: { top: "90%", left: "83%" },
     size: 44,
-    color: '#94794E',
-    animation: 'bob',
+    color: "#94794E",
+    animation: "bob",
     duration: 3.5,
     delay: 0.6,
   },
@@ -639,7 +627,7 @@ const SkillIconsBackground: React.FC = () => (
   >
     {SKILL_ICONS.map(
       ({ Icon, position, size, color, animation, duration, delay }, i) => (
-        <div key={i} style={{ position: 'absolute', ...position }}>
+        <div key={i} style={{ position: "absolute", ...position }}>
           <Icon
             size={size}
             strokeWidth={2.2}
@@ -649,11 +637,11 @@ const SkillIconsBackground: React.FC = () => (
               animation: `icon-${animation} ${duration}s ease-in-out ${
                 delay ?? 0
               }s infinite`,
-              willChange: 'transform, filter, opacity',
+              willChange: "transform, filter, opacity",
             }}
           />
         </div>
-      )
+      ),
     )}
   </div>
 );
@@ -662,57 +650,57 @@ const SkillIconsBackground: React.FC = () => (
 
 const FEATURES = [
   {
-    title: 'Track any skill',
+    title: "Track any skill",
     description:
-      'Log practice sessions with duration and notes. Watch your total hours build up automatically.',
-    panel: { value: '47.5h', label: 'total practice' },
+      "Log practice sessions with duration and notes. Watch your total hours build up automatically.",
+    panel: { value: "47.5h", label: "total practice" },
     gradient:
-      'radial-gradient(ellipse 140% 120% at 100% 0%, #F472B6 0%, #A855F7 45%, #3B82F6 100%)',
+      "radial-gradient(ellipse 140% 120% at 100% 0%, #F472B6 0%, #A855F7 45%, #3B82F6 100%)",
   },
   {
-    title: 'Build daily habits',
+    title: "Build daily habits",
     description:
-      'Check off habits daily. Build streaks and watch them compound week over week.',
-    panel: { value: '12 days', label: 'current streak' },
+      "Check off habits daily. Build streaks and watch them compound week over week.",
+    panel: { value: "12 days", label: "current streak" },
     gradient:
-      'radial-gradient(ellipse 140% 120% at 0% 100%, #FBBF24 0%, #F97316 40%, #DC2626 100%)',
+      "radial-gradient(ellipse 140% 120% at 0% 100%, #FBBF24 0%, #F97316 40%, #DC2626 100%)",
   },
   {
-    title: 'See your consistency',
+    title: "See your consistency",
     description:
-      'An 18-week heatmap shows every day you showed up. Spot patterns instantly.',
-    panel: { value: '18 wks', label: 'activity' },
+      "An 18-week heatmap shows every day you showed up. Spot patterns instantly.",
+    panel: { value: "18 wks", label: "activity" },
     gradient:
-      'radial-gradient(ellipse 140% 120% at 0% 0%, #34D399 0%, #0EA5E9 45%, #4F46E5 100%)',
+      "radial-gradient(ellipse 140% 120% at 0% 0%, #34D399 0%, #0EA5E9 45%, #4F46E5 100%)",
   },
   {
-    title: 'One-tap reminders',
+    title: "One-tap reminders",
     description:
-      'Set a native alarm on Android, or export a calendar event on iOS.',
-    panel: { value: '6:00 PM', label: 'alarm set' },
+      "Set a native alarm on Android, or export a calendar event on iOS.",
+    panel: { value: "6:00 PM", label: "alarm set" },
     gradient:
-      'radial-gradient(ellipse 140% 120% at 100% 100%, #818CF8 0%, #A855F7 45%, #EC4899 100%)',
+      "radial-gradient(ellipse 140% 120% at 100% 100%, #818CF8 0%, #A855F7 45%, #EC4899 100%)",
   },
   {
-    title: 'Works offline',
+    title: "Works offline",
     description:
-      'Log sessions on a plane, in the subway, anywhere. Changes queue and sync later.',
-    panel: { value: '3 queued', label: 'syncing soon' },
+      "Log sessions on a plane, in the subway, anywhere. Changes queue and sync later.",
+    panel: { value: "3 queued", label: "syncing soon" },
     gradient:
-      'radial-gradient(ellipse 140% 120% at 50% 50%, #FBBF24 0%, #EC4899 50%, #8B5CF6 100%)',
+      "radial-gradient(ellipse 140% 120% at 50% 50%, #FBBF24 0%, #EC4899 50%, #8B5CF6 100%)",
   },
   {
-    title: 'Your data, exportable',
+    title: "Your data, exportable",
     description:
-      'Download a full JSON backup or CSV exports of every session and habit.',
-    panel: { value: 'JSON / CSV', label: 'your choice' },
+      "Download a full JSON backup or CSV exports of every session and habit.",
+    panel: { value: "JSON / CSV", label: "your choice" },
     gradient:
-      'radial-gradient(ellipse 140% 120% at 100% 0%, #22D3EE 0%, #14B8A6 45%, #059669 100%)',
+      "radial-gradient(ellipse 140% 120% at 100% 0%, #22D3EE 0%, #14B8A6 45%, #059669 100%)",
   },
 ];
 
 const Features: React.FC = () => (
-  <section className="relative py-16 md:py-24 overflow-hidden min-h-[700px]">
+  <section className="relative py-16 md:py-24 overflow-hidden min-h-175">
     <SkillIconsBackground />
 
     <div className="relative z-10">
@@ -743,7 +731,7 @@ const Features: React.FC = () => (
             </div>
 
             <div
-              className="relative rounded-2xl min-h-[170px] px-5 py-6 flex flex-col justify-center overflow-hidden"
+              className="relative rounded-2xl min-h-42.5 px-5 py-6 flex flex-col justify-center overflow-hidden"
               style={{ background: f.gradient }}
             >
               <div
@@ -775,25 +763,25 @@ const Features: React.FC = () => (
 
 const HOW_IT_WORKS = [
   {
-    step: '01',
+    step: "01",
     icon: <Target size={20} />,
-    title: 'Add a skill or habit',
+    title: "Add a skill or habit",
     description:
-      'Skills are things you practice. Habits are things you do daily. Set up your first one in under a minute.',
+      "Skills are things you practice. Habits are things you do daily. Set up your first one in under a minute.",
   },
   {
-    step: '02',
+    step: "02",
     icon: <Check size={20} />,
-    title: 'Log as you go',
+    title: "Log as you go",
     description:
-      'Log practice sessions with a duration and notes. Check off habits when you complete them. One tap each.',
+      "Log practice sessions with a duration and notes. Check off habits when you complete them. One tap each.",
   },
   {
-    step: '03',
+    step: "03",
     icon: <Trophy size={20} />,
-    title: 'Watch it compound',
+    title: "Watch it compound",
     description:
-      'Rings fill, streaks grow, the heatmap darkens. Week after week you’ll see evidence of showing up.',
+      "Rings fill, streaks grow, the heatmap darkens. Week after week you’ll see evidence of showing up.",
   },
 ];
 
@@ -810,7 +798,7 @@ const HowItWorks: React.FC = () => (
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
       <div
-        className="hidden md:block absolute top-12 left-16 right-16 h-px bg-gradient-to-r from-emerald-200 via-emerald-300 to-emerald-200"
+        className="hidden md:block absolute top-12 left-16 right-16 h-px bg-linear-to-r from-emerald-200 via-emerald-300 to-emerald-200"
         aria-hidden="true"
       />
 
@@ -840,12 +828,12 @@ const HowItWorks: React.FC = () => (
 
 const FinalCTA: React.FC = () => (
   <section className="py-16 md:py-24">
-    <div className="relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-3xl shadow-2xl overflow-hidden">
+    <div className="relative bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-3xl shadow-2xl overflow-hidden">
       <div
         className="absolute inset-0 opacity-30"
         style={{
           backgroundImage:
-            'radial-gradient(circle at 20% 20%, rgba(255,255,255,0.35) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.25) 0%, transparent 50%)',
+            "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.35) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.25) 0%, transparent 50%)",
         }}
         aria-hidden="true"
       />
@@ -1001,7 +989,7 @@ export const LandingPage: React.FC = () => {
 
       <div className="max-w-6xl mx-auto px-6 md:px-8">
         {/* ═══ HERO — grid pattern lives here only ═══ */}
-        <div className="min-h-[100svh] flex flex-col relative">
+        <div className="min-h-svh flex flex-col relative">
           <div
             className="absolute inset-0 -z-10 bg-grid pointer-events-none"
             aria-hidden="true"
