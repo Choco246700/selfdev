@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Sparkles,
@@ -12,8 +12,6 @@ import {
   Download,
   Trophy,
   Target,
-  Shield,
-  // ─── Skill icons ───
   Music,
   Code2,
   Languages,
@@ -36,7 +34,84 @@ import {
   Sun,
   Mountain,
   CloudRain,
+  Menu,
+  X,
 } from 'lucide-react';
+
+// ─── Material Design 3 button ───────────────────────────────────────
+type ButtonVariant = 'filled' | 'outlined' | 'text';
+
+interface MaterialButtonProps {
+  to: string;
+  variant?: ButtonVariant;
+  size?: 'sm' | 'md' | 'lg';
+  children: React.ReactNode;
+  className?: string;
+  icon?: React.ReactNode;
+  trailingIcon?: React.ReactNode;
+}
+
+const MaterialButton: React.FC<MaterialButtonProps> = ({
+  to,
+  variant = 'filled',
+  size = 'md',
+  children,
+  className = '',
+  icon,
+  trailingIcon,
+}) => {
+  const sizeClasses = {
+    sm: 'h-9 px-4 text-xs',
+    md: 'h-10 px-5 text-sm',
+    lg: 'h-12 px-6 text-base',
+  }[size];
+
+  const variantClasses = {
+    filled: [
+      'bg-[#1c1b1f] text-white',
+      'shadow-[0_1px_2px_0_rgba(0,0,0,0.14),0_1px_3px_0_rgba(0,0,0,0.12)]',
+      'hover:bg-[#2a2a2e]',
+      'hover:shadow-[0_2px_4px_0_rgba(0,0,0,0.16),0_3px_6px_0_rgba(0,0,0,0.14)]',
+      'active:bg-[#141316]',
+      'active:shadow-[0_1px_2px_0_rgba(0,0,0,0.14)]',
+    ].join(' '),
+    outlined: [
+      'bg-transparent text-[#1c1b1f]',
+      'border border-[#79747E]/70',
+      'hover:bg-[#1c1b1f]/[0.06]',
+      'active:bg-[#1c1b1f]/[0.12]',
+    ].join(' '),
+    text: [
+      'bg-transparent text-[#1c1b1f]',
+      'hover:bg-[#1c1b1f]/[0.06]',
+      'active:bg-[#1c1b1f]/[0.12]',
+    ].join(' '),
+  }[variant];
+
+  const baseClasses = `inline-flex items-center justify-center gap-2 rounded-full font-medium tracking-[0.015em] transition-all duration-200 select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#1c1b1f]/40 focus-visible:ring-offset-2 ${sizeClasses} ${variantClasses} ${className}`;
+
+  const inner = (
+    <>
+      {icon}
+      {children}
+      {trailingIcon}
+    </>
+  );
+
+  if (to.startsWith('#')) {
+    return (
+      <a href={to} className={baseClasses}>
+        {inner}
+      </a>
+    );
+  }
+
+  return (
+    <Link to={to} className={baseClasses}>
+      {inner}
+    </Link>
+  );
+};
 
 // ─── Inline GitHub icon ─────────────────────────────────────────────
 const GithubIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
@@ -51,11 +126,11 @@ const GithubIcon: React.FC<{ size?: number }> = ({ size = 14 }) => (
   </svg>
 );
 
-// ─── Mini visual components for the hero mockup ─────────────────────
+// ─── Mini visual components ─────────────────────────────────────────
 
 const MiniRing: React.FC<{ progress: number }> = ({ progress }) => {
-  const size = 56;
-  const strokeWidth = 5;
+  const size = 64;
+  const strokeWidth = 6;
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const offset = circumference - (progress / 100) * circumference;
@@ -84,7 +159,7 @@ const MiniRing: React.FC<{ progress: number }> = ({ progress }) => {
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-xs font-bold text-gray-900">{progress}%</span>
+        <span className="text-sm font-bold text-gray-900">{progress}%</span>
       </div>
     </div>
   );
@@ -96,15 +171,15 @@ const MiniSkillRow: React.FC<{
   hours: string;
   streak: number;
 }> = ({ color, name, hours, streak }) => (
-  <div className="bg-gray-50 rounded-lg px-3 py-2 flex items-center gap-2">
+  <div className="bg-gray-50 rounded-xl px-4 py-3 flex items-center gap-3">
     <span
-      className="w-1.5 h-1.5 rounded-full shrink-0"
+      className="w-2 h-2 rounded-full shrink-0"
       style={{ backgroundColor: color }}
     />
-    <span className="text-[11px] font-medium text-gray-700">{name}</span>
-    <span className="ml-auto text-[11px] font-bold text-gray-900">{hours}</span>
-    <span className="flex items-center gap-0.5 text-[9px] text-orange-500">
-      <Flame size={8} className="fill-orange-500" />
+    <span className="text-sm font-medium text-gray-700">{name}</span>
+    <span className="ml-auto text-sm font-bold text-gray-900">{hours}</span>
+    <span className="flex items-center gap-1 text-[11px] text-orange-500">
+      <Flame size={10} className="fill-orange-500" />
       {streak}
     </span>
   </div>
@@ -122,11 +197,11 @@ const MiniHeatmap: React.FC = () => {
   const colors = ['#f3f4f6', '#d1fae5', '#6ee7b7', '#10b981', '#047857'];
 
   return (
-    <div className="grid grid-rows-7 grid-flow-col gap-1">
+    <div className="grid grid-rows-7 grid-flow-col gap-1.5">
       {cells.map((level, i) => (
         <div
           key={i}
-          className="w-2 h-2 rounded-xs"
+          className="w-3 h-3 rounded-[3px]"
           style={{ backgroundColor: colors[level] }}
         />
       ))}
@@ -135,105 +210,221 @@ const MiniHeatmap: React.FC = () => {
 };
 
 const HeroMockup: React.FC = () => (
-  <div className="relative">
-    <div
-      className="absolute -inset-6 bg-emerald-400/20 blur-3xl rounded-3xl"
-      aria-hidden="true"
-    />
-
-    <div className="relative bg-white rounded-2xl shadow-2xl p-4 border border-gray-100">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center">
-          <Sparkles size={12} className="text-white" strokeWidth={2.5} />
-        </div>
-        <span className="text-sm font-bold text-gray-900 tracking-tight">
-          SkillTrack
-        </span>
-        <span className="ml-auto text-[10px] text-gray-400 hidden sm:block">
-          Good afternoon, Jordan
-        </span>
-      </div>
-
-      <div className="grid grid-cols-3 gap-3">
-        <div className="bg-gray-50 rounded-xl p-3 flex flex-col items-center justify-center">
-          <MiniRing progress={75} />
-          <p className="text-[9px] text-gray-500 mt-2 font-medium">
-            Weekly goal
-          </p>
-        </div>
-
-        <div className="col-span-2 flex flex-col gap-2 justify-center">
-          <MiniSkillRow
-            color="#10b981"
-            name="Spanish"
-            hours="47.5h"
-            streak={12}
-          />
-          <MiniSkillRow
-            color="#8b5cf6"
-            name="Guitar"
-            hours="32h"
-            streak={8}
-          />
-          <MiniSkillRow
-            color="#3b82f6"
-            name="TypeScript"
-            hours="18h"
-            streak={3}
-          />
-        </div>
-      </div>
-
-      <div className="mt-3 bg-gray-50 rounded-xl p-3 overflow-hidden">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-[10px] font-semibold text-gray-700">
-            Practice Activity
-          </span>
-          <span className="text-[9px] text-gray-400">Last 18 weeks</span>
-        </div>
-        <MiniHeatmap />
-      </div>
-
-      <div className="mt-3 flex items-center gap-2">
-        <span className="text-[10px] font-semibold text-emerald-600">
-          +12%
-        </span>
-        <span className="text-[10px] text-emerald-500">from last month</span>
-      </div>
-    </div>
-  </div>
-);
-
-// ─── Nav ────────────────────────────────────────────────────────────
-
-const LandingNav: React.FC = () => (
-  <nav className="flex items-center justify-between py-4 shrink-0">
-    <Link to="/" className="flex items-center gap-2">
-      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500 text-white shadow-sm">
-        <Sparkles size={17} strokeWidth={2.5} />
+  <div className="relative bg-white rounded-2xl shadow-[0_25px_60px_-15px_rgba(15,23,42,0.28)] p-6 md:p-8 border border-gray-100/80">
+    <div className="flex items-center gap-2.5 mb-5 md:mb-7">
+      <div className="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center">
+        <Sparkles size={16} className="text-white" strokeWidth={2.5} />
       </div>
       <span className="text-base font-bold text-gray-900 tracking-tight">
         SkillTrack
       </span>
-    </Link>
-
-    <div className="flex items-center gap-3">
-      <Link
-        to="/signin"
-        className="text-sm font-semibold text-gray-700 hover:text-gray-900 transition-colors"
-      >
-        Sign in
-      </Link>
-      <Link
-        to="/signup"
-        className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors shadow-sm"
-      >
-        Get started
-        <ArrowRight size={14} />
-      </Link>
+      <span className="ml-auto text-xs text-gray-400 hidden sm:block">
+        Good afternoon, Jordan
+      </span>
     </div>
-  </nav>
+
+    <div className="grid grid-cols-3 gap-4">
+      <div className="bg-gray-50 rounded-2xl p-4 flex flex-col items-center justify-center">
+        <MiniRing progress={75} />
+        <p className="text-xs text-gray-500 mt-3 font-medium">Weekly goal</p>
+      </div>
+
+      <div className="col-span-2 flex flex-col gap-3 justify-center">
+        <MiniSkillRow
+          color="#10b981"
+          name="Spanish"
+          hours="47.5h"
+          streak={12}
+        />
+        <MiniSkillRow
+          color="#8b5cf6"
+          name="Guitar"
+          hours="32h"
+          streak={8}
+        />
+        <MiniSkillRow
+          color="#3b82f6"
+          name="TypeScript"
+          hours="18h"
+          streak={3}
+        />
+      </div>
+    </div>
+
+    <div className="mt-4 bg-gray-50 rounded-2xl p-4 overflow-hidden">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-xs font-semibold text-gray-700">
+          Practice Activity
+        </span>
+        <span className="text-[11px] text-gray-400">Last 18 weeks</span>
+      </div>
+      <MiniHeatmap />
+    </div>
+
+    <div className="mt-4 flex items-center gap-2">
+      <span className="text-xs font-semibold text-emerald-600">+12%</span>
+      <span className="text-xs text-emerald-500">from last month</span>
+    </div>
+  </div>
 );
+
+// ─── Pendulum mockup ────────────────────────────────────────────────
+
+const PendulumMockup: React.FC = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [triggered, setTriggered] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      setReducedMotion(true);
+      setTriggered(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (triggered || reducedMotion) return;
+    const el = ref.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setTriggered(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [triggered, reducedMotion]);
+
+  const dropStyle: React.CSSProperties = reducedMotion
+    ? {}
+    : {
+        animation:
+          'drop-in 1.15s cubic-bezier(0.34, 1.15, 0.64, 1) forwards',
+        animationPlayState: triggered ? 'running' : 'paused',
+      };
+
+  const swingStyle: React.CSSProperties = reducedMotion
+    ? {}
+    : {
+        transformOrigin: 'top center',
+        animation:
+          'pendulum-swing 5s cubic-bezier(0.42, 0, 0.58, 1) 1.15s forwards',
+        animationPlayState: triggered ? 'running' : 'paused',
+      };
+
+  return (
+    <div ref={ref} className="relative flex flex-col items-center">
+      <div className="relative z-10">
+        <div className="w-3 h-3 rounded-full bg-gradient-to-b from-gray-300 to-gray-500 shadow-[0_1px_2px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.7)]" />
+      </div>
+
+      <div data-drop className="w-full" style={dropStyle}>
+        <div data-pendulum className="w-full" style={swingStyle}>
+          <div className="mx-auto w-[2px] h-24 md:h-32 bg-gradient-to-b from-gray-500/70 via-gray-500/40 to-gray-400/15 rounded-full" />
+
+          <div className="mt-2">
+            <HeroMockup />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ─── Navigation ─────────────────────────────────────────────────────
+
+const NAV_LINKS = [
+  { label: 'Features', href: '#features' },
+  { label: 'How it works', href: '#how-it-works' },
+//   { label: 'Pricing', href: '#pricing' },
+//   { label: 'About', href: '#about' },
+];
+
+const LandingNav: React.FC = () => {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <nav className="sticky top-4 z-50 py-4">
+      <div className="bg-white rounded-full shadow-[0_8px_30px_rgba(15,23,42,0.08)] border border-gray-100/70 flex items-center justify-between gap-3 pl-3 pr-2 py-2">
+        <Link
+          to="/"
+          className="flex items-center gap-2.5 pl-1 shrink-0"
+          onClick={() => setMobileOpen(false)}
+        >
+          <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm">
+            <Sparkles size={16} strokeWidth={2.5} />
+          </div>
+          <span className="text-sm font-bold text-gray-900 tracking-tight">
+            SkillTrack
+          </span>
+        </Link>
+
+        <div className="hidden md:flex items-center gap-0.5 flex-1 justify-center">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-full transition-colors"
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0">
+          <div className="hidden sm:block">
+            <MaterialButton to="/signin" variant="outlined" size="sm">
+              Sign in
+            </MaterialButton>
+          </div>
+
+          <MaterialButton to="/signup" variant="filled" size="sm">
+            Get started
+          </MaterialButton>
+
+          <button
+            onClick={() => setMobileOpen((v) => !v)}
+            aria-label="Toggle menu"
+            className="md:hidden flex items-center justify-center w-9 h-9 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
+          >
+            {mobileOpen ? <X size={18} /> : <Menu size={18} />}
+          </button>
+        </div>
+      </div>
+
+      {mobileOpen && (
+        <div className="md:hidden mt-2 bg-white rounded-2xl shadow-lg border border-gray-100/70 p-2 flex flex-col">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              onClick={() => setMobileOpen(false)}
+              className="px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
+            >
+              {link.label}
+            </a>
+          ))}
+          <Link
+            to="/signin"
+            onClick={() => setMobileOpen(false)}
+            className="px-4 py-3 text-sm font-semibold text-gray-700 hover:bg-gray-50 rounded-xl transition-colors border-t border-gray-100 mt-1 pt-3"
+          >
+            Sign in
+          </Link>
+        </div>
+      )}
+    </nav>
+  );
+};
 
 // ─── Animated skill icons ───────────────────────────────────────────
 
@@ -252,7 +443,6 @@ interface SkillIconDef {
 }
 
 const SKILL_ICONS: SkillIconDef[] = [
-  // ── Top band ──
   {
     Icon: Music,
     position: { top: '3%', left: '8%', transform: 'rotate(-12deg)' },
@@ -287,8 +477,6 @@ const SKILL_ICONS: SkillIconDef[] = [
     animation: 'rise',
     duration: 6,
   },
-
-  // ── Upper-mid band ──
   {
     Icon: Code2,
     position: { top: '20%', left: '3%', transform: 'rotate(-18deg)' },
@@ -332,8 +520,6 @@ const SKILL_ICONS: SkillIconDef[] = [
     duration: 4,
     delay: 2,
   },
-
-  // ── Center band ──
   {
     Icon: BookOpen,
     position: { top: '42%', left: '1%' },
@@ -367,8 +553,6 @@ const SKILL_ICONS: SkillIconDef[] = [
     animation: 'rain',
     duration: 3.8,
   },
-
-  // ── Lower-mid band ──
   {
     Icon: Footprints,
     position: { top: '68%', left: '6%', transform: 'rotate(20deg)' },
@@ -411,8 +595,6 @@ const SKILL_ICONS: SkillIconDef[] = [
     animation: 'pump',
     duration: 1.8,
   },
-
-  // ── Bottom band ──
   {
     Icon: Plane,
     position: { top: '88%', left: '14%' },
@@ -480,55 +662,57 @@ const SkillIconsBackground: React.FC = () => (
 
 const FEATURES = [
   {
-    icon: <TrendingUp size={20} />,
-    tone: 'bg-[#E5EDE6] text-[#5E7A66]',
     title: 'Track any skill',
     description:
-      'Log practice sessions with duration and notes. Watch your total hours and streaks build up automatically.',
+      'Log practice sessions with duration and notes. Watch your total hours build up automatically.',
+    panel: { value: '47.5h', label: 'total practice' },
+    gradient:
+      'radial-gradient(ellipse 140% 120% at 100% 0%, #F472B6 0%, #A855F7 45%, #3B82F6 100%)',
   },
   {
-    icon: <Flame size={20} />,
-    tone: 'bg-[#F2E5E4] text-[#9E6A64]',
     title: 'Build daily habits',
     description:
-      'Check off habits, build streaks, and see a 7-day mini-heatmap on every row. Freeze habits you need a break from.',
+      'Check off habits daily. Build streaks and watch them compound week over week.',
+    panel: { value: '12 days', label: 'current streak' },
+    gradient:
+      'radial-gradient(ellipse 140% 120% at 0% 100%, #FBBF24 0%, #F97316 40%, #DC2626 100%)',
   },
   {
-    icon: <BarChart3 size={20} />,
-    tone: 'bg-[#E2EBF1] text-[#5A7891]',
     title: 'See your consistency',
     description:
-      'An 18-week heatmap shows every day you showed up. Spot patterns, gaps, and streaks you didn’t know you had.',
+      'An 18-week heatmap shows every day you showed up. Spot patterns instantly.',
+    panel: { value: '18 wks', label: 'activity' },
+    gradient:
+      'radial-gradient(ellipse 140% 120% at 0% 0%, #34D399 0%, #0EA5E9 45%, #4F46E5 100%)',
   },
   {
-    icon: <Bell size={20} />,
-    tone: 'bg-[#ECE7F2] text-[#736A95]',
     title: 'One-tap reminders',
     description:
-      'Set a native alarm on Android, or export a calendar event on iOS and desktop. Never miss a session or habit again.',
+      'Set a native alarm on Android, or export a calendar event on iOS.',
+    panel: { value: '6:00 PM', label: 'alarm set' },
+    gradient:
+      'radial-gradient(ellipse 140% 120% at 100% 100%, #818CF8 0%, #A855F7 45%, #EC4899 100%)',
   },
   {
-    icon: <WifiOff size={20} />,
-    tone: 'bg-[#F1EBDD] text-[#94794E]',
     title: 'Works offline',
     description:
-      'Log sessions on a plane, in the subway, anywhere. Changes queue locally and sync the moment you reconnect.',
+      'Log sessions on a plane, in the subway, anywhere. Changes queue and sync later.',
+    panel: { value: '3 queued', label: 'syncing soon' },
+    gradient:
+      'radial-gradient(ellipse 140% 120% at 50% 50%, #FBBF24 0%, #EC4899 50%, #8B5CF6 100%)',
   },
   {
-    icon: <Download size={20} />,
-    tone: 'bg-[#DFEDEB] text-[#4E8D85]',
     title: 'Your data, exportable',
     description:
-      'Download a full JSON backup or CSV exports of every session and habit. No lock-in, ever.',
+      'Download a full JSON backup or CSV exports of every session and habit.',
+    panel: { value: 'JSON / CSV', label: 'your choice' },
+    gradient:
+      'radial-gradient(ellipse 140% 120% at 100% 0%, #22D3EE 0%, #14B8A6 45%, #059669 100%)',
   },
 ];
 
 const Features: React.FC = () => (
-  <section className="relative py-16 md:py-24 overflow-hidden min-h-175">
-    {/* Soft veil so the icons read against a calmer base */}
-    
-
-    {/* Scattered animated skill icons */}
+  <section className="relative py-16 md:py-24 overflow-hidden min-h-[700px]">
     <SkillIconsBackground />
 
     <div className="relative z-10">
@@ -550,19 +734,36 @@ const Features: React.FC = () => (
         {FEATURES.map((f) => (
           <div
             key={f.title}
-            className="bg-white rounded-2xl shadow-card p-6 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+            className="group relative bg-[#0B0B0F] rounded-3xl p-3.5 shadow-[0_10px_40px_-12px_rgba(15,23,42,0.35)] hover:shadow-[0_24px_56px_-16px_rgba(15,23,42,0.5)] hover:-translate-y-1 transition-all duration-300"
           >
-            <div
-              className={`flex items-center justify-center w-10 h-10 rounded-xl mb-4 ${f.tone}`}
-            >
-              {f.icon}
+            <div className="px-2 pt-2 pb-3">
+              <h3 className="text-sm font-semibold text-white/95 tracking-tight">
+                {f.title}
+              </h3>
             </div>
-            <h3 className="text-base font-bold text-gray-900 mb-2">
-              {f.title}
-            </h3>
-            <p className="text-sm text-gray-500 leading-relaxed">
-              {f.description}
-            </p>
+
+            <div
+              className="relative rounded-2xl min-h-[170px] px-5 py-6 flex flex-col justify-center overflow-hidden"
+              style={{ background: f.gradient }}
+            >
+              <div
+                className="absolute top-0 inset-x-0 h-px bg-white/40"
+                aria-hidden="true"
+              />
+
+              <p className="text-3xl font-bold text-white leading-none tracking-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.15)]">
+                {f.panel.value}
+              </p>
+              <p className="text-xs text-white/85 mt-2 tracking-wide">
+                {f.panel.label}
+              </p>
+            </div>
+
+            <div className="px-2 pt-3.5 pb-1">
+              <p className="text-[11px] text-white/45 leading-relaxed line-clamp-2">
+                {f.description}
+              </p>
+            </div>
           </div>
         ))}
       </div>
@@ -609,7 +810,7 @@ const HowItWorks: React.FC = () => (
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
       <div
-        className="hidden md:block absolute top-12 left-16 right-16 h-px bg-linear-to-r from-emerald-200 via-emerald-300 to-emerald-200"
+        className="hidden md:block absolute top-12 left-16 right-16 h-px bg-gradient-to-r from-emerald-200 via-emerald-300 to-emerald-200"
         aria-hidden="true"
       />
 
@@ -639,7 +840,7 @@ const HowItWorks: React.FC = () => (
 
 const FinalCTA: React.FC = () => (
   <section className="py-16 md:py-24">
-    <div className="relative bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-3xl shadow-2xl overflow-hidden">
+    <div className="relative bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 rounded-3xl shadow-2xl overflow-hidden">
       <div
         className="absolute inset-0 opacity-30"
         style={{
@@ -650,13 +851,6 @@ const FinalCTA: React.FC = () => (
       />
 
       <div className="relative p-8 md:p-14 text-center">
-        <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/20 rounded-full px-3 py-1.5 mb-6">
-          <Shield size={12} className="text-white" />
-          <span className="text-xs font-semibold text-white">
-            Free forever · No credit card
-          </span>
-        </div>
-
         <h2 className="text-3xl md:text-4xl font-bold text-white leading-tight max-w-2xl mx-auto">
           Start building the skills and habits you keep meaning to start
         </h2>
@@ -666,19 +860,12 @@ const FinalCTA: React.FC = () => (
         </p>
 
         <div className="flex items-center justify-center gap-3 mt-8 flex-wrap">
-          <Link
-            to="/signup"
-            className="flex items-center gap-1.5 bg-white hover:bg-gray-50 text-emerald-700 px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-lg"
-          >
+          <MaterialButton to="/signup" variant="filled" size="md">
             Create free account
-            <ArrowRight size={15} />
-          </Link>
-          <Link
-            to="/signin"
-            className="flex items-center gap-1.5 bg-white/10 backdrop-blur-sm border border-white/30 hover:bg-white/20 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors"
-          >
+          </MaterialButton>
+          <MaterialButton to="/signin" variant="outlined" size="md">
             Sign in
-          </Link>
+          </MaterialButton>
         </div>
       </div>
     </div>
@@ -688,97 +875,104 @@ const FinalCTA: React.FC = () => (
 // ─── Footer ─────────────────────────────────────────────────────────
 
 const Footer: React.FC = () => (
-  <footer className="pt-16 pb-8 border-t border-gray-200/60">
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
-      <div className="md:col-span-2">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="flex items-center justify-center w-7 h-7 rounded-md bg-emerald-500 text-white shadow-sm">
-            <Sparkles size={15} strokeWidth={2.5} />
+  <footer className="mt-16 md:mt-24 bg-[#0B0B0F]">
+    <div className="max-w-6xl mx-auto px-6 md:px-8 py-14 md:py-20">
+      {/* Top section — brand + link columns */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8 mb-12">
+        {/* Brand */}
+        <div className="md:col-span-2">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500 text-white shadow-[0_0_20px_-4px_rgba(16,185,129,0.5)]">
+              <Sparkles size={16} strokeWidth={2.5} />
+            </div>
+            <span className="text-base font-bold text-white tracking-tight">
+              SkillTrack
+            </span>
           </div>
-          <span className="text-sm font-bold text-gray-900 tracking-tight">
-            SkillTrack
+          <p className="text-sm text-white/50 max-w-xs leading-relaxed">
+            A calm, focused tracker for the skills and habits that matter to
+            you. Built with care, designed for the long game.
+          </p>
+        </div>
+
+        {/* Product column */}
+        <div>
+          <h4 className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-4">
+            Product
+          </h4>
+          <ul className="flex flex-col gap-3">
+            <li>
+              <a
+                href="#features"
+                className="text-sm text-white/60 hover:text-white transition-colors"
+              >
+                Features
+              </a>
+            </li>
+            <li>
+              <a
+                href="#how-it-works"
+                className="text-sm text-white/60 hover:text-white transition-colors"
+              >
+                How it works
+              </a>
+            </li>
+            <li>
+              <Link
+                to="/signup"
+                className="text-sm text-white/60 hover:text-white transition-colors"
+              >
+                Get started
+              </Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Account column */}
+        <div>
+          <h4 className="text-[10px] font-semibold uppercase tracking-widest text-white/40 mb-4">
+            Account
+          </h4>
+          <ul className="flex flex-col gap-3">
+            <li>
+              <Link
+                to="/signin"
+                className="text-sm text-white/60 hover:text-white transition-colors"
+              >
+                Sign in
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/signup"
+                className="text-sm text-white/60 hover:text-white transition-colors"
+              >
+                Create account
+              </Link>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      {/* Bottom row — divider + copyright + tech credits */}
+      <div className="pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-xs text-white/40">
+          © {new Date().getFullYear()} SkillTrack. Made with care.
+        </p>
+        <div className="flex items-center gap-4">
+          <a
+            href="https://github.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GitHub"
+            className="text-white/40 hover:text-white transition-colors"
+          >
+            <GithubIcon size={16} />
+          </a>
+          <span className="text-xs text-white/40">
+            Built with React · TypeScript · Supabase
           </span>
         </div>
-        <p className="text-xs text-gray-500 max-w-xs leading-relaxed">
-          A calm, focused tracker for the skills and habits that matter to
-          you. Built with care, designed for the long game.
-        </p>
-      </div>
-
-      <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-700 mb-3">
-          Product
-        </h4>
-        <ul className="flex flex-col gap-2">
-          <li>
-            <a
-              href="#features"
-              className="text-xs text-gray-500 hover:text-emerald-600 transition-colors"
-            >
-              Features
-            </a>
-          </li>
-          <li>
-            <a
-              href="#how-it-works"
-              className="text-xs text-gray-500 hover:text-emerald-600 transition-colors"
-            >
-              How it works
-            </a>
-          </li>
-          <li>
-            <Link
-              to="/signup"
-              className="text-xs text-gray-500 hover:text-emerald-600 transition-colors"
-            >
-              Get started
-            </Link>
-          </li>
-        </ul>
-      </div>
-
-      <div>
-        <h4 className="text-xs font-semibold uppercase tracking-wider text-gray-700 mb-3">
-          Account
-        </h4>
-        <ul className="flex flex-col gap-2">
-          <li>
-            <Link
-              to="/signin"
-              className="text-xs text-gray-500 hover:text-emerald-600 transition-colors"
-            >
-              Sign in
-            </Link>
-          </li>
-          <li>
-            <Link
-              to="/signup"
-              className="text-xs text-gray-500 hover:text-emerald-600 transition-colors"
-            >
-              Create account
-            </Link>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <div className="pt-6 border-t border-gray-200/60 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <p className="text-[11px] text-gray-400">
-        © {new Date().getFullYear()} SkillTrack. Made with care.
-      </p>
-      <div className="flex items-center gap-4">
-        <a
-          href="https://github.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="GitHub"
-          className="text-gray-400 hover:text-gray-700 transition-colors"
-        >
-          <GithubIcon size={14} />
-        </a>
-        <span className="text-[11px] text-gray-400">
-          Built with React · TypeScript · Supabase
-        </span>
       </div>
     </div>
   </footer>
@@ -788,12 +982,14 @@ const Footer: React.FC = () => (
 
 export const LandingPage: React.FC = () => {
   return (
-    <>
-      <div className="fixed inset-0 -z-10 bg-mesh-c2" aria-hidden="true" />
+    <div className="min-h-screen font-sans relative">
+      <div className="fixed inset-0 -z-30 bg-mesh-c2" aria-hidden="true" />
+
       <div
-        className="fixed inset-0 -z-10 bg-grid pointer-events-none"
+        className="absolute top-0 left-0 right-0 h-[160vh] -z-20 bg-landing-gradient pointer-events-none"
         aria-hidden="true"
       />
+
       <div
         className="fixed inset-0 -z-10 bg-vignette pointer-events-none"
         aria-hidden="true"
@@ -803,83 +999,60 @@ export const LandingPage: React.FC = () => {
         aria-hidden="true"
       />
 
-      <div className="min-h-screen font-sans">
-        <div className="max-w-6xl mx-auto px-6 md:px-8">
-          {/* ═══ HERO — fills the viewport ═══ */}
-          <div className="min-h-svh flex flex-col">
-            <LandingNav />
+      <div className="max-w-6xl mx-auto px-6 md:px-8">
+        {/* ═══ HERO — grid pattern lives here only ═══ */}
+        <div className="min-h-[100svh] flex flex-col relative">
+          <div
+            className="absolute inset-0 -z-10 bg-grid pointer-events-none"
+            aria-hidden="true"
+          />
 
-            <section className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-8 items-center py-8">
-              <div>
+          <LandingNav />
 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-[1.05] tracking-tight">
-                  Track the skills and habits that{' '}
-                  <span className="bg-linear-to-br from-emerald-500 to-teal-600 bg-clip-text text-transparent">
-                    actually
-                  </span>{' '}
-                  stick.
-                </h1>
+          <section className="flex-1 flex flex-col items-center justify-center text-center pb-16 pt-8">
+            <h1 className="font-display font-normal text-5xl sm:text-6xl md:text-7xl lg:text-[88px] text-gray-900 leading-[1.05] max-w-4xl">
+              Track the skills
+              <br />
+              and habits that <span className="italic">actually</span> stick.
+            </h1>
 
-                <p className="text-base md:text-lg text-gray-600 mt-5 leading-relaxed max-w-lg">
-                  SkillTrack turns your daily practice into visible progress.
-                  Log skill sessions, check off habits, and watch the
-                  compounding evidence of showing up — all in one calm
-                  dashboard.
-                </p>
+            <p className="text-base sm:text-lg md:text-xl text-gray-700 mt-8 leading-relaxed md:whitespace-nowrap">
+              A calm, focused tracker for the skills and habits that matter to
+              you.
+            </p>
 
-                <div className="flex items-center gap-3 mt-8 flex-wrap">
-                  <Link
-                    to="/signup"
-                    className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-emerald-600/20"
-                  >
-                    Start tracking free
-                    <ArrowRight size={15} />
-                  </Link>
-                  <Link
-                    to="/signin"
-                    className="flex items-center gap-1.5 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 px-5 py-3 rounded-xl text-sm font-semibold transition-colors shadow-sm"
-                  >
-                    Sign in
-                  </Link>
-                </div>
-
-                <div className="flex items-center gap-5 mt-8 flex-wrap">
-                  {[
-                    'No credit card required',
-                    'Works offline',
-                    'Export anytime',
-                  ].map((item) => (
-                    <div
-                      key={item}
-                      className="flex items-center gap-1.5 text-xs text-gray-500"
-                    >
-                      <Check size={12} className="text-emerald-500" />
-                      {item}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="relative lg:pl-8">
-                <HeroMockup />
-              </div>
-            </section>
-          </div>
-          {/* ═══ /HERO ═══ */}
-
-          <div id="features">
-            <Features />
-          </div>
-
-          <div id="how-it-works">
-            <HowItWorks />
-          </div>
-
-          <FinalCTA />
-
-          <Footer />
+            <div className="flex items-center justify-center gap-3 mt-10 flex-wrap">
+              <MaterialButton to="/signup" variant="filled" size="md">
+                Start tracking free
+              </MaterialButton>
+              <MaterialButton to="#how-it-works" variant="outlined" size="md">
+                See how it works
+              </MaterialButton>
+            </div>
+          </section>
         </div>
+        {/* ═══ /HERO ═══ */}
+
+        {/* ═══ HANGING MOCKUP — pendulum animation ═══ */}
+        <section className="relative overflow-hidden py-8 pb-24 md:pb-32">
+          <div className="mx-auto w-full max-w-5xl px-2 sm:px-4">
+            <PendulumMockup />
+          </div>
+        </section>
+
+        <div id="features">
+          <Features />
+        </div>
+
+        <div id="how-it-works">
+          <HowItWorks />
+        </div>
+
+        <FinalCTA />
       </div>
-    </>
+
+      {/* Footer — full viewport width, outside the max-w-6xl container */}
+      <Footer />
+    </div>
   );
 };
