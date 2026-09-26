@@ -1,5 +1,11 @@
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { Header } from './components/Header';
 import { MobileNav } from './components/MobileNav';
@@ -28,6 +34,9 @@ import {
 import type { NewHabitInput } from './components/TodayTodos';
 
 // ─── Lazy-loaded pages ───────────────────────────────────────────────
+const LandingPage = lazy(() =>
+  import('./pages/LandingPage').then((m) => ({ default: m.LandingPage }))
+);
 const AuthPage = lazy(() =>
   import('./pages/AuthPage').then((m) => ({ default: m.AuthPage }))
 );
@@ -56,20 +65,14 @@ const AdminPage = lazy(() =>
 // ─── Root: auth gate ─────────────────────────────────────────────────
 export default function App() {
   const { user, loading } = useAuth();
+  const location = useLocation();
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-xs text-gray-400">Loading SkillTrack…</p>
-        </div>
-      </div>
-    );
+    return <FullScreenLoader />;
   }
 
-  // Password reset works whether or not the user is authenticated
-  if (window.location.pathname === '/reset-password') {
+  // Password reset — always accessible, even when logged in
+  if (location.pathname === '/reset-password') {
     return (
       <Suspense fallback={<FullScreenLoader />}>
         <ResetPasswordPage />
@@ -77,15 +80,22 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return (
-      <Suspense fallback={<FullScreenLoader />}>
-        <AuthPage />
-      </Suspense>
-    );
+  // Logged in → straight to the app for any route
+  if (user) {
+    return <AppContent />;
   }
 
-  return <AppContent />;
+  // Not logged in → landing page or auth pages
+  return (
+    <Suspense fallback={<FullScreenLoader />}>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/signin" element={<AuthPage initialMode="signin" />} />
+        <Route path="/signup" element={<AuthPage initialMode="signup" />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
+  );
 }
 
 // ─── Authed shell ────────────────────────────────────────────────────
@@ -437,6 +447,7 @@ function AppContent() {
                     />
                   }
                 />
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
           )}
@@ -503,13 +514,13 @@ function AppContent() {
   );
 }
 
-// ─── Full-screen loader (used while a lazy page chunk loads) ────────
+// ─── Full-screen loader ──────────────────────────────────────────────
 function FullScreenLoader() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs text-gray-400">Loading…</p>
+        <p className="text-xs text-gray-400">Loading SkillTrack…</p>
       </div>
     </div>
   );
