@@ -1,0 +1,241 @@
+@import 'tailwindcss';
+
+/* ─── existing keyframes — keep all of them ─── */
+
+/* ─── NEW: break animation ─── */
+
+/* Frost overlay brightens then fades out during the break */
+@keyframes frost-break-fade {
+  0% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Crack lines draw themselves in with stroke-dashoffset */
+@keyframes crack-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Shards fly outward from their origin and fade */
+@keyframes shard-fly {
+  0% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+  60% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--shard-x), var(--shard-y))
+      rotate(var(--shard-rotate)) scale(0.3);
+  }
+}
+
+/* Ice flash — brief bright burst as the sheet shatters */
+@keyframes ice-flash {
+  0% {
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Frost overlay fades in + slightly brightens */
+@keyframes frost-overlay-in {
+  0% {
+    opacity: 0;
+  }
+  60% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Shimmer — brighter and faster so it's clearly visible */
+@keyframes ice-shimmer {
+  0% {
+    transform: translateX(0) skewX(-15deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(900%) skewX(-15deg);
+    opacity: 0;
+  }
+}
+
+/* Snowflakes drift with more motion and brightness */
+@keyframes crystal-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) rotate(0deg) scale(1);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translate(2px, -2.5px) rotate(25deg) scale(1.15);
+    opacity: 1;
+  }
+}
+
+/* Ice block forming around the emoji */
+@keyframes ice-form {
+  0% {
+    transform: scale(0.85);
+    filter: blur(2px);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1);
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+
+/* Frost pill pop-in */
+@keyframes freeze-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+    filter: blur(3px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.12);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ── Emerald Spotlight v2 ── */
+.bg-mesh-c2 {
+  background-color: #f8fafc;
+  background-image:
+    /* 1. Primary emerald spotlight — top right (dominant) */
+    radial-gradient(
+      60% 55% at 88% 8%,
+      rgba(16, 185, 129, 0.22) 0%,
+      rgba(16, 185, 129, 0.08) 35%,
+      transparent 70%
+    ),
+    /* 2. Secondary emerald counter-glow — bottom left */
+    radial-gradient(
+      50% 45% at 8% 92%,
+      rgba(20, 184, 166, 0.14) 0%,
+      transparent 65%
+    ),
+    /* 3. Cool sky bloom — top left (balance) */
+    radial-gradient(
+      40% 40% at 5% 5%,
+      rgba(56, 189, 248, 0.10) 0%,
+      transparent 70%
+    ),
+    /* 4. Faint teal whisper — bottom right */
+    radial-gradient(
+      35% 35% at 95% 95%,
+      rgba(52, 211, 153, 0.08) 0%,
+      transparent 70%
+    ),
+    /* 5. Base vertical gradient */
+    linear-gradient(180deg, #f8fafc 0%, #eef2f6 100%);
+}
+
+/* ── Faint dot grid overlay ── */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.028) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* ── Edge vignette (soft darkening top & bottom) ── */
+.bg-vignette {
+  background-image:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.035) 0%, transparent 20%),
+    linear-gradient(0deg, rgba(15, 23, 42, 0.045) 0%, transparent 22%);
+}
+
+/* ── Grain ── */
+.bg-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px 200px;
+}
+
+/* ── Optional: animated aurora on the primary glow ──
+   If you want the top-right glow to breathe/drift slowly, apply this
+   class to a separate absolutely-positioned div layered above .bg-mesh-c2.
+   See the optional snippet at the bottom of this file. ── */
+@keyframes aurora-drift {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translate(-2%, 1.5%) scale(1.06);
+    opacity: 1;
+  }
+}
+
+.bg-aurora {
+  background-image: radial-gradient(
+    55% 50% at 90% 10%,
+    rgba(16, 185, 129, 0.18) 0%,
+    transparent 65%
+  );
+  animation: aurora-drift 18s ease-in-out infinite;
+}
+
+/* Slim horizontal scrollbar for the skill cards row */
+.scroll-row::-webkit-scrollbar {
+  height: 6px;
+}
+.scroll-row::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-row::-webkit-scrollbar-thumb {
+  background: rgba(15, 23, 42, 0.12);
+  border-radius: 999px;
+}
+.scroll-row::-webkit-scrollbar-thumb:hover {
+  background: rgba(15, 23, 42, 0.22);
+}
+.scroll-row {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(15, 23, 42, 0.12) transparent;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
