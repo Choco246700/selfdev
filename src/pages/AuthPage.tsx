@@ -236,7 +236,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     <Shell>
       <div className="grid md:grid-cols-2">
         {/* ═══ Left panel — branding + image ═══ */}
-        <div className="hidden md:flex flex-col relative overflow-hidden bg-gradient-to-br from-emerald-500 via-emerald-600 to-teal-600 p-8 lg:p-10">
+        <div className="hidden md:flex flex-col relative overflow-hidden bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-600 p-8 lg:p-10">
           {/* Decorative blurred circles */}
           <div
             className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-white/20 blur-3xl"
@@ -269,7 +269,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           </div>
 
           {/* Image — fills remaining vertical space */}
-          <div className="relative z-10 flex-1 min-h-[220px] lg:min-h-[260px] rounded-2xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.35)]">
+          <div className="relative z-10 flex-1 min-h-55 lg:min-h-65 rounded-2xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.35)]">
             <img
               src="/images/growth-books.jpg"
               alt="A stack of books labeled with words like training, coaching, knowledge, and skills"
@@ -278,7 +278,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 
             {/* Soft gradient overlay to blend the image with the panel */}
             <div
-              className="absolute inset-0 bg-gradient-to-t from-emerald-900/40 via-transparent to-transparent"
+              className="absolute inset-0 bg-linear-to-t from-emerald-900/40 via-transparent to-transparent"
               aria-hidden="true"
             />
 
