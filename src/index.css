@@ -1,10 +1,16 @@
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700;1,800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,400;1,700&display=swap");
 @import "tailwindcss";
 
 /* Display serif for hero headlines */
 .font-display {
   font-family: "Playfair Display", ui-serif, Georgia, "Times New Roman", serif;
   letter-spacing: -0.02em;
+}
+
+.font-serious {
+  font-family: 'Merriweather', ui-serif, Georgia, 'Times New Roman', serif;
+  letter-spacing: -0.01em;
 }
 /* Landing page gradient — radiates from the top-right corner.
    White at the corner, fading through light blue to a soft lilac.

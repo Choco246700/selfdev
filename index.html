@@ -2,9 +2,48 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/public/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>skilltrack</title>
+    <!-- Light mode — the emerald brand color -->
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: light)"
+      content="#10b981"
+    />
+
+    <!-- Dark mode — a deeper emerald that reads well against dark chrome -->
+    <meta
+      name="theme-color"
+      media="(prefers-color-scheme: dark)"
+      content="#065f46"
+    />
+
+    <!-- SEO -->
+    <title>SkillTrack — Track the skills and habits that actually stick</title>
+    <meta
+      name="description"
+      content="SkillTrack is a calm, focused tracker for the skills and habits that matter to you. Log practice sessions, build daily habits, and watch your progress compound."
+    />
+
+    <!-- Open Graph (social sharing) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="SkillTrack" />
+    <meta
+      property="og:description"
+      content="Track the skills and habits that actually stick."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="https://skilltrack-steel.vercel.app" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SkillTrack" />
+    <meta
+      name="twitter:description"
+      content="Track the skills and habits that actually stick."
+    />
+    <meta name="twitter:image" content="/og-image.png" />
   </head>
   <body>
     <div id="root"></div>

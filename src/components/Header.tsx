@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Sparkles,
   Plus,
   LogOut,
   Mail,
@@ -11,9 +10,11 @@ import {
   FileSpreadsheet,
   MessageSquare,
 } from "lucide-react";
-import { useAuth } from '../hooks/useAuth';
+import { Wordmark } from "./Wordmark";
+import { useAuth } from "../hooks/useAuth";
 import { supabase } from "../lib/supabaseClient";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 
 interface HeaderProps {
   onNewSkillClick: () => void;
@@ -94,14 +95,9 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="flex items-center justify-between py-2 gap-3">
       {/* Brand */}
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="flex items-center justify-center w-7 h-7 rounded-md bg-emerald-500 text-white shadow-sm">
-          <Sparkles size={16} strokeWidth={2.5} />
-        </div>
-        <span className="text-base font-bold text-gray-900 tracking-tight">
-          SkillTrack
-        </span>
-      </div>
+      <Link to="/" className="flex items-center text-gray-900">
+        <Wordmark className="h-8 w-auto" />
+      </Link>
 
       {/* Actions */}
       <div

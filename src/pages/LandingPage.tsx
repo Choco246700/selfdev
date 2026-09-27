@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { Wordmark } from "../components/Wordmark";
 import {
   Sparkles,
   Check,
@@ -345,15 +346,10 @@ const LandingNav: React.FC = () => {
       <div className="bg-white rounded-full shadow-[0_8px_30px_rgba(15,23,42,0.08)] border border-gray-100/70 flex items-center justify-between gap-3 pl-3 pr-2 py-2">
         <Link
           to="/"
-          className="flex items-center gap-2.5 pl-1 shrink-0"
+          className="flex items-center pl-1 shrink-0 text-gray-900"
           onClick={() => setMobileOpen(false)}
         >
-          <div className="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm">
-            <Sparkles size={16} strokeWidth={2.5} />
-          </div>
-          <span className="text-sm font-bold text-gray-900 tracking-tight">
-            SkillTrack
-          </span>
+          <Wordmark className="h-7 w-auto" />
         </Link>
 
         <div className="hidden md:flex items-center gap-0.5 flex-1 justify-center">
@@ -869,13 +865,8 @@ const Footer: React.FC = () => (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8 mb-12">
         {/* Brand */}
         <div className="md:col-span-2">
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500 text-white shadow-[0_0_20px_-4px_rgba(16,185,129,0.5)]">
-              <Sparkles size={16} strokeWidth={2.5} />
-            </div>
-            <span className="text-base font-bold text-white tracking-tight">
-              SkillTrack
-            </span>
+          <div className="flex items-center mb-4 text-white">
+            <Wordmark className="h-7 w-auto" />
           </div>
           <p className="text-sm text-white/50 max-w-xs leading-relaxed">
             A calm, focused tracker for the skills and habits that matter to

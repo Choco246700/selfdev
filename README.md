@@ -1,5 +1,7 @@
 # SkillTrack
-
+<p align="center">
+  <img src="public/wordmark.svg" alt="SkillTrack" width="220" />
+</p>
 A dashboard for tracking skills you're learning and habits you're building.
 
 ![SkillTrack](./docs/screenshot.png)
