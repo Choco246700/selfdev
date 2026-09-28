@@ -6,18 +6,18 @@ interface WordmarkProps {
 }
 
 /**
- * SkillTrack wordmark — icon + text as one SVG.
+ * SelfDev wordmark — icon + text as one SVG.
  *
  * The emerald icon and white sparkle are locked to their brand colors,
- * but the "SkillTrack" text inherits `currentColor`, so you can flip it
+ * but the "SelfDev" text inherits `currentColor`, so you can flip it
  * to white on dark backgrounds by setting `text-white` on the parent.
  */
 export const Wordmark: React.FC<WordmarkProps> = ({
   className = 'h-8',
-  'aria-label': ariaLabel = 'SkillTrack',
+  'aria-label': ariaLabel = 'SelfDev',
 }) => (
   <svg
-    viewBox="0 0 220 40"
+    viewBox="0 0 175 40"
     fill="none"
     xmlns="http://www.w3.org/2000/svg"
     className={className}
@@ -43,7 +43,7 @@ export const Wordmark: React.FC<WordmarkProps> = ({
       letterSpacing="-0.02em"
       fill="currentColor"
     >
-      SkillTrack
+      SelfDev
     </text>
   </svg>
 );
