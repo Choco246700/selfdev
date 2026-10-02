@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Routes,
   Route,
@@ -66,6 +66,26 @@ const AdminPage = lazy(() =>
 export default function App() {
   const { user, loading } = useAuth();
   const location = useLocation();
+
+  useEffect(() => {
+    // Notify user if redirected to root with an OAuth error
+    const searchParams = new URLSearchParams(window.location.search);
+    const hashString = window.location.hash.startsWith('#')
+      ? window.location.hash.substring(1)
+      : window.location.hash;
+    const hashParams = new URLSearchParams(hashString);
+
+    const errorParam =
+      searchParams.get('error_description') ||
+      hashParams.get('error_description') ||
+      searchParams.get('error') ||
+      hashParams.get('error');
+
+    if (errorParam) {
+      toast.error(decodeURIComponent(errorParam.replace(/\+/g, ' ')));
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
 
   if (loading) {
     return <FullScreenLoader />;

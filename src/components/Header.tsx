@@ -86,7 +86,13 @@ export const Header: React.FC<HeaderProps> = ({
     fn?.();
   };
 
-  const initials = getInitials(user?.email);
+  const userAvatar =
+    (user?.user_metadata?.avatar_url as string | undefined) ||
+    (user?.user_metadata?.picture as string | undefined);
+  const fullName =
+    (user?.user_metadata?.full_name as string | undefined) ||
+    (user?.user_metadata?.name as string | undefined);
+  const initials = getInitials(fullName || user?.email);
   const hasExportActions =
     Boolean(onExportJSON) ||
     Boolean(onExportSessionsCSV) ||
@@ -139,11 +145,20 @@ export const Header: React.FC<HeaderProps> = ({
             onClick={() => setMenuOpen((v) => !v)}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
-            className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full bg-white border border-gray-200 hover:border-gray-300 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 pl-1 pr-2 py-1 rounded-full bg-white border border-gray-200 hover:border-gray-300 transition-colors shadow-sm cursor-pointer"
           >
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500 text-white text-[10px] font-bold">
-              {initials}
-            </span>
+            {userAvatar ? (
+              <img
+                src={userAvatar}
+                alt="Profile"
+                className="w-6 h-6 rounded-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-500 text-white text-[10px] font-bold">
+                {initials}
+              </span>
+            )}
             <ChevronDown
               size={12}
               className={`text-gray-400 transition-transform ${
@@ -157,8 +172,13 @@ export const Header: React.FC<HeaderProps> = ({
               role="menu"
               className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-50"
             >
-              {/* Email */}
+              {/* User info */}
               <div className="px-3 py-2 border-b border-gray-100">
+                {fullName && (
+                  <p className="text-xs font-semibold text-gray-900 truncate mb-0.5">
+                    {fullName}
+                  </p>
+                )}
                 <div className="flex items-center gap-2 text-gray-700">
                   <Mail size={12} className="text-gray-400 shrink-0" />
                   <span className="text-xs font-medium truncate">
