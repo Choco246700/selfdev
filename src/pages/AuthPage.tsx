@@ -475,9 +475,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({
               {/* Google Identity Services container (used when VITE_GOOGLE_CLIENT_ID is configured) */}
               <div
                 ref={googleBtnContainerRef}
-                className={`w-full flex justify-center min-h-[44px] ${
+                className={`w-full flex justify-center min-h-11 ${
                   gsiReady && googleClientId ? 'block' : 'hidden'
-                } [&>div]:w-full [&>div>iframe]:!w-full [&>div>iframe]:!rounded-xl`}
+                } [&>div]:w-full [&>div>iframe]:w-full! [&>div>iframe]:rounded-xl!`}
               />
 
               {/* Fallback button (used if GSI is not loaded or VITE_GOOGLE_CLIENT_ID is not configured) */}
