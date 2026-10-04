@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Sparkles,
@@ -9,7 +9,6 @@ import {
   ArrowLeft,
   CheckCircle2,
   Check,
-  Loader2,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -19,71 +18,20 @@ interface AuthPageProps {
   initialMode?: Mode;
 }
 
-const GoogleIcon: React.FC<{ size?: number; className?: string }> = ({
-  size = 18,
-  className = '',
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-    className={className}
-  >
-    <path
-      fill="#4285F4"
-      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-    />
-    <path
-      fill="#34A853"
-      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-    />
-    <path
-      fill="#FBBC05"
-      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-    />
-    <path
-      fill="#EA4335"
-      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-    />
-  </svg>
-);
-
-// Generate a cryptographically secure raw nonce and its SHA-256 hash for Supabase / Google verification
-async function generateNonce(): Promise<{ raw: string; hashed: string }> {
-  const array = new Uint8Array(16);
-  crypto.getRandomValues(array);
-  const raw = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
-  const encoder = new TextEncoder();
-  const data = encoder.encode(raw);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashed = Array.from(new Uint8Array(hashBuffer), (b) =>
-    b.toString(16).padStart(2, '0')
-  ).join('');
-  return { raw, hashed };
-}
-
 export const AuthPage: React.FC<AuthPageProps> = ({
   initialMode = 'signin',
 }) => {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>(initialMode);
-  const isSignUp = mode === 'signup';
-  const isForgot = mode === 'forgot';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
-  const [gsiReady, setGsiReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [signupSentTo, setSignupSentTo] = useState<string | null>(null);
-
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-  const googleBtnContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMode(initialMode);
@@ -92,111 +40,8 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     setSignupSentTo(null);
   }, [initialMode]);
 
-  // Initialize Google Identity Services (GSI) when VITE_GOOGLE_CLIENT_ID is provided
-  useEffect(() => {
-    if (!googleClientId) return;
-
-    let isMounted = true;
-    let currentRawNonce = '';
-
-    const setupGsi = async () => {
-      if (!window.google?.accounts?.id || !googleBtnContainerRef.current) return;
-
-      try {
-        const { raw, hashed } = await generateNonce();
-        currentRawNonce = raw;
-
-        window.google.accounts.id.initialize({
-          client_id: googleClientId,
-          nonce: hashed,
-          auto_select: false,
-          cancel_on_tap_outside: true,
-          callback: async (response) => {
-            setGoogleLoading(true);
-            setError(null);
-            try {
-              const { error } = await supabase.auth.signInWithIdToken({
-                provider: 'google',
-                token: response.credential,
-                nonce: currentRawNonce,
-              });
-              if (error) throw error;
-            } catch (err) {
-              setError(
-                err instanceof Error
-                  ? err.message
-                  : 'Could not sign in with Google.'
-              );
-            } finally {
-              if (isMounted) setGoogleLoading(false);
-            }
-          },
-        });
-
-        if (googleBtnContainerRef.current) {
-          googleBtnContainerRef.current.innerHTML = '';
-          const containerWidth =
-            googleBtnContainerRef.current.clientWidth || 360;
-          window.google.accounts.id.renderButton(
-            googleBtnContainerRef.current,
-            {
-              type: 'standard',
-              theme: 'outline',
-              size: 'large',
-              text: isSignUp ? 'signup_with' : 'signin_with',
-              shape: 'rectangular',
-              logo_alignment: 'left',
-              width: Math.min(Math.max(containerWidth, 240), 400),
-            }
-          );
-          setGsiReady(true);
-        }
-      } catch (err) {
-        console.error('Error initializing Google Identity Services:', err);
-      }
-    };
-
-    if (window.google?.accounts?.id) {
-      setupGsi();
-    } else {
-      const interval = setInterval(() => {
-        if (window.google?.accounts?.id) {
-          clearInterval(interval);
-          setupGsi();
-        }
-      }, 100);
-      const timer = setTimeout(() => clearInterval(interval), 4000);
-      return () => {
-        isMounted = false;
-        clearInterval(interval);
-        clearTimeout(timer);
-      };
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [googleClientId, isSignUp]);
-
-  // Catch OAuth errors from URL query parameters or hash fragments
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const hashString = window.location.hash.startsWith('#')
-      ? window.location.hash.substring(1)
-      : window.location.hash;
-    const hashParams = new URLSearchParams(hashString);
-
-    const errorParam =
-      searchParams.get('error_description') ||
-      hashParams.get('error_description') ||
-      searchParams.get('error') ||
-      hashParams.get('error');
-
-    if (errorParam) {
-      setError(decodeURIComponent(errorParam.replace(/\+/g, ' ')));
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
+  const isSignUp = mode === 'signup';
+  const isForgot = mode === 'forgot';
 
   const resetMessages = () => {
     setError(null);
@@ -263,30 +108,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     }
   };
 
-  const handleGoogleAuth = async () => {
-    setError(null);
-    setInfo(null);
-    setGoogleLoading(true);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: `${window.location.origin}/`,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'select_account',
-          },
-        },
-      });
-      if (error) throw error;
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Could not sign in with Google.'
-      );
-      setGoogleLoading(false);
-    }
-  };
-
   const handleResendConfirmation = async () => {
     if (!signupSentTo) return;
     setLoading(true);
@@ -310,19 +131,21 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   if (signupSentTo) {
     return (
       <Shell>
-        <div className="text-center max-w-md mx-auto p-10 md:p-12">
+        <div className="text-center max-w-md mx-auto p-8 md:p-12">
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center">
               <CheckCircle2 size={28} className="text-emerald-500" />
             </div>
           </div>
-          <h1 className="font-serious text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="font-serious text-2xl md:text-3xl font-bold text-gray-900 mb-2">
             Check your inbox
           </h1>
-          <p className="text-base text-gray-500 mb-8 leading-relaxed">
+          <p className="text-sm md:text-base text-gray-500 mb-8 leading-relaxed wrap-break-word">
             We sent a confirmation link to{' '}
-            <span className="font-medium text-gray-700">{signupSentTo}</span>.
-            Click it to activate your account.
+            <span className="font-medium text-gray-700 break-all">
+              {signupSentTo}
+            </span>
+            . Click it to activate your account.
           </p>
 
           {info && (
@@ -363,10 +186,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   // ─── Main auth card ────────────────────────────────────────────
   return (
     <Shell>
-      <div className="grid md:grid-cols-2">
-        {/* ═══ Left panel — branding + image ═══ */}
+      <div className="grid grid-cols-1 md:grid-cols-2">
+        {/* ═══ Left panel — hidden on mobile ═══ */}
         <div className="hidden md:flex flex-col relative overflow-hidden bg-linear-to-br from-emerald-500 via-emerald-600 to-teal-600 p-8 lg:p-10">
-          {/* Decorative blurred circles */}
           <div
             className="absolute -top-24 -right-24 w-72 h-72 rounded-full bg-white/20 blur-3xl"
             aria-hidden="true"
@@ -376,7 +198,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             aria-hidden="true"
           />
 
-          {/* Brand */}
           <div className="relative z-10 flex items-center gap-2.5 mb-8">
             <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20">
               <Sparkles size={18} className="text-white" strokeWidth={2.5} />
@@ -386,7 +207,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             </span>
           </div>
 
-          {/* Headline + subtext */}
           <div className="relative z-10 mb-8">
             <h2 className="font-serious text-3xl lg:text-4xl font-bold text-white leading-[1.2] mb-4">
               Ready to build the skills you keep meaning to learn?
@@ -397,22 +217,16 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             </p>
           </div>
 
-          {/* Image — fills remaining vertical space */}
           <div className="relative z-10 flex-1 min-h-55 lg:min-h-65 rounded-2xl overflow-hidden shadow-[0_10px_40px_-10px_rgba(0,0,0,0.35)]">
             <img
               src="/images/growth-books.jpg"
               alt="A stack of books labeled with words like training, coaching, knowledge, and skills"
               className="absolute inset-0 w-full h-full object-cover"
             />
-
-            {/* Soft gradient overlay to blend the image with the panel */}
             <div
               className="absolute inset-0 bg-linear-to-t from-emerald-900/40 via-transparent to-transparent"
               aria-hidden="true"
             />
-
-            {/* "If you" text overlaid on the image, sitting above
-                the stack of books where the labels are */}
             <p className="absolute top-[4%] left-[27%] font-serious text-3xl lg:text-4xl font-bold text-white leading-none tracking-tight drop-shadow-[0_3px_12px_rgba(0,0,0,0.65)]">
               If you
             </p>
@@ -420,11 +234,11 @@ export const AuthPage: React.FC<AuthPageProps> = ({
         </div>
 
         {/* ═══ Right panel — the form ═══ */}
-        <div className="p-8 md:p-10 lg:p-12 flex flex-col justify-center">
+        <div className="p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-center min-w-0">
           {/* Mobile brand */}
           <Link
             to="/"
-            className="md:hidden flex items-center gap-2 mb-8 self-center"
+            className="md:hidden flex items-center gap-2 mb-6 self-center"
           >
             <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-emerald-500 text-white shadow-sm">
               <Sparkles size={16} strokeWidth={2.5} />
@@ -444,7 +258,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
             </button>
           )}
 
-          <h1 className="font-serious text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="font-serious text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
             {isForgot
               ? 'Reset password'
               : isSignUp
@@ -459,72 +273,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({
               : 'Sign in to continue your streaks.'}
           </p>
 
-          {error && (
-            <div className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3 mb-5">
-              {error}
-            </div>
-          )}
-          {info && (
-            <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 mb-5">
-              {info}
-            </div>
-          )}
-
-          {!isForgot && (
-            <>
-              {/* Google Identity Services container (used when VITE_GOOGLE_CLIENT_ID is configured) */}
-              <div
-                ref={googleBtnContainerRef}
-                className={`w-full flex justify-center min-h-11 ${
-                  gsiReady && googleClientId ? 'block' : 'hidden'
-                } [&>div]:w-full [&>div>iframe]:w-full! [&>div>iframe]:rounded-xl!`}
-              />
-
-              {/* Fallback button (used if GSI is not loaded or VITE_GOOGLE_CLIENT_ID is not configured) */}
-              {(!googleClientId || !gsiReady) && (
-                <button
-                  type="button"
-                  onClick={handleGoogleAuth}
-                  disabled={googleLoading || loading}
-                  className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 hover:border-gray-300 hover:bg-gray-50 active:bg-gray-100 disabled:opacity-60 disabled:cursor-not-allowed text-sm font-medium text-gray-700 py-3 rounded-xl transition-all shadow-xs cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
-                >
-                  {googleLoading ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin text-gray-500" />
-                      <span>Connecting to Google…</span>
-                    </>
-                  ) : (
-                    <>
-                      <GoogleIcon size={18} />
-                      <span>{isSignUp ? 'Sign up with Google' : 'Sign in with Google'}</span>
-                    </>
-                  )}
-                </button>
-              )}
-
-              {googleLoading && gsiReady && (
-                <div className="flex items-center justify-center gap-2 py-2 text-xs text-gray-500">
-                  <Loader2 size={14} className="animate-spin text-emerald-600" />
-                  <span>Signing in with Google…</span>
-                </div>
-              )}
-
-              <div className="relative my-5">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-100" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="px-3 bg-white text-[11px] font-medium uppercase tracking-widest text-gray-400">
-                    or continue with email
-                  </span>
-                </div>
-              </div>
-            </>
-          )}
-
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {/* Email */}
-            <div>
+            <div className="min-w-0">
               <label className="text-xs font-medium text-gray-700 mb-2 block">
                 Email
               </label>
@@ -540,14 +291,14 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                   placeholder="you@example.com"
                   required
                   autoComplete="email"
-                  className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                  className="w-full min-w-0 box-border pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
                 />
               </div>
             </div>
 
             {/* Password */}
             {!isForgot && (
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs font-medium text-gray-700 mb-2 block">
                   Password
                 </label>
@@ -568,7 +319,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     autoComplete={
                       isSignUp ? 'new-password' : 'current-password'
                     }
-                    className="w-full pl-10 pr-12 py-3 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                    className="w-full min-w-0 box-border pl-10 pr-12 py-3 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
                   />
                   <button
                     type="button"
@@ -586,7 +337,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 
             {/* Confirm password */}
             {isSignUp && (
-              <div>
+              <div className="min-w-0">
                 <label className="text-xs font-medium text-gray-700 mb-2 block">
                   Confirm password
                 </label>
@@ -603,7 +354,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     required
                     minLength={8}
                     autoComplete="new-password"
-                    className="w-full pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                    className="w-full min-w-0 box-border pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
                   />
                 </div>
                 <p className="text-[11px] text-gray-400 mt-2">
@@ -612,10 +363,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({
               </div>
             )}
 
-            {/* Terms checkbox — signup only */}
+            {/* Terms checkbox */}
             {isSignUp && (
-              <label className="flex items-start gap-2.5 cursor-pointer select-none pt-1">
-                <span className="relative flex items-center justify-center mt-0.5">
+              <label className="flex items-start gap-2.5 cursor-pointer select-none pt-1 min-w-0">
+                <span className="relative flex items-center justify-center mt-0.5 shrink-0">
                   <input
                     type="checkbox"
                     checked={acceptedTerms}
@@ -628,7 +379,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     )}
                   </span>
                 </span>
-                <span className="text-xs text-gray-500 leading-relaxed">
+                <span className="text-xs text-gray-500 leading-relaxed min-w-0">
                   By registering you agree to our{' '}
                   <a
                     href="#terms"
@@ -661,7 +412,17 @@ export const AuthPage: React.FC<AuthPageProps> = ({
               </div>
             )}
 
-            {/* Error / Info — displayed at the top of the form */}
+            {/* Error / Info */}
+            {error && (
+              <div className="text-xs text-red-600 bg-red-50 border border-red-100 rounded-xl px-4 py-3 wrap-break-word">
+                {error}
+              </div>
+            )}
+            {info && (
+              <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 wrap-break-word">
+                {info}
+              </div>
+            )}
 
             {/* Submit */}
             <button
@@ -698,9 +459,9 @@ export const AuthPage: React.FC<AuthPageProps> = ({
   );
 };
 
-// ─── Shell — background + card ──────────────────────────────────────
+// ─── Shell ──────────────────────────────────────────────────────
 const Shell: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <div className="min-h-screen flex items-center justify-center p-4 md:p-6 font-sans">
+  <div className="min-h-screen flex items-center justify-center p-3 sm:p-4 md:p-6 font-sans">
     <div className="fixed inset-0 -z-30 bg-mesh-c2" aria-hidden="true" />
     <div
       className="fixed inset-0 -z-20 bg-grid pointer-events-none"
