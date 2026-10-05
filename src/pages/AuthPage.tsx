@@ -9,6 +9,7 @@ import {
   ArrowLeft,
   CheckCircle2,
   Check,
+  User as UserIcon,
 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 
@@ -23,6 +24,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 }) => {
   const navigate = useNavigate();
   const [mode, setMode] = useState<Mode>(initialMode);
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -54,6 +56,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     setPassword('');
     setConfirmPassword('');
     setAcceptedTerms(false);
+    setName('');
     setSignupSentTo(null);
     if (next === 'signup') navigate('/signup', { replace: true });
     else if (next === 'signin') navigate('/signin', { replace: true });
@@ -63,6 +66,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({
     e.preventDefault();
     resetMessages();
 
+    if (isSignUp && !name.trim()) {
+      setError('Please enter your name.');
+      return;
+    }
     if (isSignUp && password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
@@ -90,7 +97,10 @@ export const AuthPage: React.FC<AuthPageProps> = ({
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+          options: {
+            emailRedirectTo: `${window.location.origin}/`,
+            data: { full_name: name.trim() },
+          },
         });
         if (error) throw error;
         setSignupSentTo(email);
@@ -235,7 +245,6 @@ export const AuthPage: React.FC<AuthPageProps> = ({
 
         {/* ═══ Right panel — the form ═══ */}
         <div className="p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col justify-center min-w-0">
-          {/* Mobile brand */}
           <Link
             to="/"
             className="md:hidden flex items-center gap-2 mb-6 self-center"
@@ -274,6 +283,30 @@ export const AuthPage: React.FC<AuthPageProps> = ({
           </p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            {/* Name — signup only */}
+            {isSignUp && (
+              <div className="min-w-0">
+                <label className="text-xs font-medium text-gray-700 mb-2 block">
+                  Name
+                </label>
+                <div className="relative">
+                  <UserIcon
+                    size={16}
+                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                  />
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g., Richard Attipoe"
+                    required
+                    autoComplete="name"
+                    className="w-full min-w-0 box-border pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* Email */}
             <div className="min-w-0">
               <label className="text-xs font-medium text-gray-700 mb-2 block">

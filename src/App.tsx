@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import {
   Routes,
   Route,
@@ -6,6 +6,7 @@ import {
   useLocation,
   Navigate,
 } from 'react-router-dom';
+import type { User } from '@supabase/supabase-js';
 import toast from 'react-hot-toast';
 import { Header } from './components/Header';
 import { MobileNav } from './components/MobileNav';
@@ -66,26 +67,6 @@ const AdminPage = lazy(() =>
 export default function App() {
   const { user, loading } = useAuth();
   const location = useLocation();
-
-  useEffect(() => {
-    // Notify user if redirected to root with an OAuth error
-    const searchParams = new URLSearchParams(window.location.search);
-    const hashString = window.location.hash.startsWith('#')
-      ? window.location.hash.substring(1)
-      : window.location.hash;
-    const hashParams = new URLSearchParams(hashString);
-
-    const errorParam =
-      searchParams.get('error_description') ||
-      hashParams.get('error_description') ||
-      searchParams.get('error') ||
-      hashParams.get('error');
-
-    if (errorParam) {
-      toast.error(decodeURIComponent(errorParam.replace(/\+/g, ' ')));
-      window.history.replaceState({}, document.title, window.location.pathname);
-    }
-  }, []);
 
   if (loading) {
     return <FullScreenLoader />;
@@ -414,6 +395,13 @@ function AppContent() {
             isSyncing={isSyncing}
           />
 
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {getGreeting()}, {getDisplayName(user)}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">{formattedDate}</p>
+          </div>
+
           {loading ? (
             <DashboardSkeleton />
           ) : (
@@ -534,13 +522,60 @@ function AppContent() {
   );
 }
 
+// ─── Helpers ─────────────────────────────────────────────────────────
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return 'Good morning';
+  if (hour < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
+const formattedDate = new Date().toLocaleDateString('en-US', {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+/**
+ * Resolves a friendly display name for the signed-in user.
+ *
+ * Priority:
+ *   1. user_metadata.full_name — set at signup, or by Google OAuth
+ *   2. user_metadata.name — Google sometimes sends this
+ *   3. The email prefix, capitalized
+ *   4. "there" — so the greeting never reads oddly
+ */
+function getDisplayName(user: User | null): string {
+  if (!user) return 'there';
+
+  const meta = user.user_metadata as
+    | { full_name?: unknown; name?: unknown }
+    | undefined;
+
+  const fullName = meta?.full_name;
+  if (typeof fullName === 'string' && fullName.trim()) {
+    return fullName.trim();
+  }
+
+  const name = meta?.name;
+  if (typeof name === 'string' && name.trim()) {
+    return name.trim();
+  }
+
+  const prefix = (user.email ?? '').split('@')[0];
+  if (!prefix) return 'there';
+  return prefix[0].toUpperCase() + prefix.slice(1);
+}
+
 // ─── Full-screen loader ──────────────────────────────────────────────
 function FullScreenLoader() {
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs text-gray-400">Loading SkillTrack…</p>
+        <p className="text-xs text-gray-400">Loading SelfDev…</p>
       </div>
     </div>
   );
