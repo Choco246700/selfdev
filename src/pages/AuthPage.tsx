@@ -298,7 +298,7 @@ export const AuthPage: React.FC<AuthPageProps> = ({
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g., Your full name"
+                    placeholder="e.g., Peter Parker"
                     required
                     autoComplete="name"
                     className="w-full min-w-0 box-border pl-10 pr-4 py-3 text-sm rounded-xl border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-shadow"
