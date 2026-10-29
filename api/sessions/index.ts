@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { prisma } from "../_lib/prisma";
+import { prisma } from "../_lib/prisma.js";
 import {
   ApiError,
   handleError,
   methodNotAllowed,
   requireUser,
-} from "../_lib/server";
+} from "../_lib/server.js";
 
 function serialize(s: {
   id: string;

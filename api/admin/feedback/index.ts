@@ -1,11 +1,11 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { prisma } from "../../_lib/prisma";
+import { prisma } from "../../_lib/prisma.js";
 import {
   assertAdmin,
   handleError,
   methodNotAllowed,
   requireUser,
-} from "../../_lib/server";
+} from "../../_lib/server.js";
 
 export default async function handler(
   req: VercelRequest,

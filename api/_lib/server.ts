@@ -1,10 +1,10 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { prisma } from "./prisma";
+import { prisma } from "./prisma.js";
 import {
   clearSessionCookie,
   getSessionToken,
   verifySession,
-} from "./auth";
+} from "./auth.js";
 
 export class ApiError extends Error {
   status: number;

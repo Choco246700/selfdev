@@ -1,12 +1,12 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
-import { prisma } from "../../_lib/prisma";
+import { prisma } from "../../_lib/prisma.js";
 import {
   ApiError,
   assertAdmin,
   handleError,
   methodNotAllowed,
   requireUser,
-} from "../../_lib/server";
+} from "../../_lib/server.js";
 
 const VALID_STATUSES = ["new", "read", "resolved", "wontfix"];
 

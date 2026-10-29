@@ -1,13 +1,13 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import bcrypt from "bcryptjs";
-import { prisma } from "../_lib/prisma";
-import { setSessionCookie, signSession } from "../_lib/auth";
+import { prisma } from "../_lib/prisma.js";
+import { setSessionCookie, signSession } from "../_lib/auth.js";
 import {
   ApiError,
   handleError,
   methodNotAllowed,
   serializeUser,
-} from "../_lib/server";
+} from "../_lib/server.js";
 
 const ROUNDS = 12;
 
