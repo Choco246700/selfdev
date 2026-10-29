@@ -55,5 +55,14 @@ export function useAdminData(isAdmin: boolean) {
     refresh();
   }, [refresh]);
 
-  return { users, stats, loading, error, refresh };
+  const deleteUser = useCallback(
+    async (id: string) => {
+      await apiFetch(`/api/admin/users/${id}`, { method: "DELETE" });
+      // Re-fetch so both the users list and the stats reflect the change
+      await refresh();
+    },
+    [refresh],
+  );
+
+  return { users, stats, loading, error, refresh, deleteUser };
 }

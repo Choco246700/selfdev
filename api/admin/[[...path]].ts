@@ -13,7 +13,7 @@ const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
 function getSegments(req: VercelRequest): string[] {
   const url = (req.url ?? "").split("?")[0];
-  const parts = url.split("/").filter(Boolean); // ['api', 'admin', 'feedback', 'abc']
+  const parts = url.split("/").filter(Boolean);
   return parts.slice(2);
 }
 
@@ -30,7 +30,10 @@ export default async function handler(
     const first = segments[0];
     const second = segments[1];
 
-    if (first === "users") return await users(req, res);
+    if (first === "users") {
+      if (second) return await userById(req, res, user, second);
+      return await users(req, res);
+    }
     if (first === "stats") return await stats(req, res);
     if (first === "feedback") {
       if (second) return await feedbackById(req, res, second);
@@ -67,6 +70,44 @@ async function users(req: VercelRequest, res: VercelResponse) {
       emailConfirmed: true,
     })),
   });
+}
+
+async function userById(
+  req: VercelRequest,
+  res: VercelResponse,
+  currentUser: { id: string },
+  targetId: string,
+) {
+  if (req.method !== "DELETE") return methodNotAllowed(res, ["DELETE"]);
+
+  // Can't delete yourself
+  if (targetId === currentUser.id) {
+    throw new ApiError(
+      "You can't delete your own account",
+      400,
+      "SELF_DELETE",
+    );
+  }
+
+  const target = await prisma.user.findUnique({ where: { id: targetId } });
+  if (!target) throw new ApiError("User not found", 404, "NOT_FOUND");
+
+  // Prevent deleting the last admin
+  if (target.isAdmin) {
+    const adminCount = await prisma.user.count({
+      where: { isAdmin: true },
+    });
+    if (adminCount <= 1) {
+      throw new ApiError(
+        "Can't delete the last admin — promote another user first",
+        400,
+        "LAST_ADMIN",
+      );
+    }
+  }
+
+  await prisma.user.delete({ where: { id: targetId } });
+  return res.status(204).end();
 }
 
 async function stats(req: VercelRequest, res: VercelResponse) {
