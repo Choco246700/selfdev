@@ -3,7 +3,13 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), {
+    name: 'force-exit',
+    closeBundle() {
+      // Force the process to exit cleanly after the build finishes
+      setTimeout(() => process.exit(0), 0);
+    },
+  },],
   server: {
     proxy: {
       "/api": {
