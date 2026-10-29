@@ -15,10 +15,9 @@ export default async function handler(
     const user = await requireUser(req, res);
     if (!user) return;
 
-    const id = req.query.id;
-    if (typeof id !== "string" || !id) {
-      throw new ApiError("Missing id", 400, "BAD_REQUEST");
-    }
+    const raw = req.query.id;
+    const id = Array.isArray(raw) ? raw[0] : raw;
+    if (!id) throw new ApiError("Missing id", 400, "BAD_REQUEST");
 
     const existing = await prisma.skill.findFirst({
       where: { id, userId: user.id },

@@ -7,6 +7,12 @@ import {
   requireUser,
 } from "../_lib/server.js";
 
+function getId(req: VercelRequest): string | undefined {
+  const url = (req.url ?? "").split("?")[0];
+  const parts = url.split("/").filter(Boolean);
+  return parts[2];
+}
+
 function serialize(s: {
   id: string;
   userId: string;
@@ -33,6 +39,43 @@ export default async function handler(
     const user = await requireUser(req, res);
     if (!user) return;
 
+    const id = getId(req);
+
+    // ─── /api/sessions/:id ──────────────────────────────────────
+    if (id) {
+      const existing = await prisma.session.findFirst({
+        where: { id, userId: user.id },
+      });
+      if (!existing) throw new ApiError("Session not found", 404, "NOT_FOUND");
+
+      if (req.method === "PATCH") {
+        const body = (req.body ?? {}) as {
+          durationMinutes?: number;
+          notes?: string;
+        };
+        const row = await prisma.session.update({
+          where: { id },
+          data: {
+            ...(body.durationMinutes !== undefined
+              ? { durationMinutes: body.durationMinutes }
+              : {}),
+            ...(body.notes !== undefined
+              ? { notes: body.notes?.trim() || null }
+              : {}),
+          },
+        });
+        return res.status(200).json({ session: serialize(row) });
+      }
+
+      if (req.method === "DELETE") {
+        await prisma.session.delete({ where: { id } });
+        return res.status(204).end();
+      }
+
+      return methodNotAllowed(res, ["PATCH", "DELETE"]);
+    }
+
+    // ─── /api/sessions ──────────────────────────────────────────
     if (req.method === "GET") {
       const rows = await prisma.session.findMany({
         where: { userId: user.id },
@@ -49,17 +92,17 @@ export default async function handler(
         notes?: string;
       };
       if (!body?.skillId || typeof body.skillId !== "string") {
-        throw new ApiError("skillId is required", 422);
+        throw new ApiError("skillId is required", 422, "VALIDATION");
       }
       const duration = Number(body.durationMinutes);
       if (!Number.isFinite(duration) || duration <= 0) {
-        throw new ApiError("durationMinutes must be > 0", 422);
+        throw new ApiError("durationMinutes must be > 0", 422, "VALIDATION");
       }
 
       const skill = await prisma.skill.findFirst({
         where: { id: body.skillId, userId: user.id },
       });
-      if (!skill) throw new ApiError("Skill not found", 404);
+      if (!skill) throw new ApiError("Skill not found", 404, "NOT_FOUND");
 
       const row = await prisma.session.create({
         data: {

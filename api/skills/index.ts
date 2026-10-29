@@ -30,23 +30,20 @@ export default async function handler(
       const weeklyGoalHours = Number(
         (req.body as { weeklyGoalHours?: unknown })?.weeklyGoalHours,
       );
-
       if (!Number.isFinite(weeklyGoalHours) || weeklyGoalHours <= 0) {
         throw new ApiError("weeklyGoalHours must be > 0", 422, "VALIDATION");
       }
 
-      const id = (req.body as { id?: string })?.id;
-
+      const bodyId = (req.body as { id?: string })?.id;
       const skill = await prisma.skill.create({
         data: {
-          ...(id ? { id } : {}),
+          ...(bodyId ? { id: bodyId } : {}),
           userId: user.id,
           name,
           color,
           weeklyGoalHours,
         },
       });
-
       return res.status(201).json({ skill });
     }
 

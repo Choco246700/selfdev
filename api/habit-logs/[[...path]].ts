@@ -7,6 +7,12 @@ import {
   requireUser,
 } from "../_lib/server.js";
 
+function getId(req: VercelRequest): string | undefined {
+  const url = (req.url ?? "").split("?")[0];
+  const parts = url.split("/").filter(Boolean);
+  return parts[2];
+}
+
 function serialize(l: {
   id: string;
   userId: string;
@@ -31,6 +37,24 @@ export default async function handler(
     const user = await requireUser(req, res);
     if (!user) return;
 
+    const id = getId(req);
+
+    // ─── /api/habit-logs/:id ────────────────────────────────────
+    if (id) {
+      const existing = await prisma.habitLog.findFirst({
+        where: { id, userId: user.id },
+      });
+      if (!existing) throw new ApiError("Habit log not found", 404, "NOT_FOUND");
+
+      if (req.method === "DELETE") {
+        await prisma.habitLog.delete({ where: { id } });
+        return res.status(204).end();
+      }
+
+      return methodNotAllowed(res, ["DELETE"]);
+    }
+
+    // ─── /api/habit-logs ────────────────────────────────────────
     if (req.method === "GET") {
       const rows = await prisma.habitLog.findMany({
         where: { userId: user.id },
@@ -47,20 +71,21 @@ export default async function handler(
         completed?: boolean;
       };
       if (!body?.habitId || typeof body.habitId !== "string") {
-        throw new ApiError("habitId is required", 422);
+        throw new ApiError("habitId is required", 422, "VALIDATION");
       }
       if (!body.date || !/^\d{4}-\d{2}-\d{2}$/.test(body.date)) {
-        throw new ApiError("date must be YYYY-MM-DD", 422);
+        throw new ApiError("date must be YYYY-MM-DD", 422, "VALIDATION");
       }
 
       const habit = await prisma.habit.findFirst({
         where: { id: body.habitId, userId: user.id },
       });
-      if (!habit) throw new ApiError("Habit not found", 404);
+      if (!habit) throw new ApiError("Habit not found", 404, "NOT_FOUND");
 
-      // Upsert handles the "already logged today" case (unique constraint)
       const row = await prisma.habitLog.upsert({
-        where: { habitId_date: { habitId: body.habitId, date: body.date } },
+        where: {
+          habitId_date: { habitId: body.habitId, date: body.date },
+        },
         update: { completed: body.completed ?? true },
         create: {
           ...(body.id ? { id: body.id } : {}),
