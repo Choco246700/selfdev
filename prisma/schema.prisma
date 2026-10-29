@@ -1,0 +1,127 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// User
+// ─────────────────────────────────────────────────────────────────────
+model User {
+  id                   String    @id @default(cuid())
+  email                String    @unique
+  passwordHash         String?   // null until user sets a password
+  fullName             String?
+  isAdmin              Boolean   @default(false)
+  onboardingCompleted  Boolean   @default(false)
+  lastSignInAt         DateTime?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  skills    Skill[]
+  sessions  Session[]
+  habits    Habit[]
+  habitLogs HabitLog[]
+  feedback  Feedback[]
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Skill
+// ─────────────────────────────────────────────────────────────────────
+model Skill {
+  id              String   @id @default(cuid())
+  userId          String
+  name            String
+  color           String
+  weeklyGoalHours Float
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessions Session[]
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Session
+// ─────────────────────────────────────────────────────────────────────
+model Session {
+  id              String   @id @default(cuid())
+  userId          String
+  skillId         String
+  durationMinutes Int
+  notes           String?
+  createdAt       DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([skillId, createdAt])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Habit
+// ─────────────────────────────────────────────────────────────────────
+model Habit {
+  id         String   @id @default(cuid())
+  userId     String
+  emoji      String
+  name       String
+  targetTime String?  // "HH:mm"
+  location   String?
+  frozen     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  logs HabitLog[]
+
+  @@index([userId])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// HabitLog
+// ─────────────────────────────────────────────────────────────────────
+model HabitLog {
+  id        String   @id @default(cuid())
+  userId    String
+  habitId   String
+  date      String   // "YYYY-MM-DD" — matches formatDateKey()
+  completed Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+
+  // Matches the unique constraint your app relies on
+  // (see `useOfflineSync.ts`: ignores code 23505 on habit_logs inserts)
+  @@unique([habitId, date])
+  @@index([userId, date])
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Feedback
+// ─────────────────────────────────────────────────────────────────────
+model Feedback {
+  id         String   @id @default(cuid())
+  userId     String?
+  userEmail  String?
+  category   String   // 'bug' | 'feature' | 'general'
+  message    String
+  pageUrl    String?
+  userAgent  String?
+  status     String   @default("new")   // 'new' | 'read' | 'resolved' | 'wontfix'
+  adminNotes String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([status, createdAt])
+  @@index([userId])
+}

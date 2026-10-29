@@ -22,7 +22,7 @@ export const AdminGuard: React.FC<AdminGuardProps> = ({ children }) => {
   if (!user) return <Navigate to="/" replace />;
 
   // app_metadata is server-controlled; users can't set this themselves
-  const isAdmin = user.app_metadata?.is_admin === true;
+  const isAdmin = user.isAdmin;
   if (!isAdmin) {
     return (
       <div className="bg-white rounded-2xl shadow-card p-12 text-center max-w-md mx-auto">

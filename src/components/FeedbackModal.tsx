@@ -7,10 +7,10 @@ import {
   Send,
   CheckCircle2,
 } from 'lucide-react';
-import { supabase } from '../lib/supabaseClient';
 import { useAuth } from '../hooks/useAuth';
 import { useSaveAction } from '../hooks/useSaveAction';
 import toast from 'react-hot-toast';
+import { apiFetch } from '../lib/api';
 
 type Category = 'bug' | 'feature' | 'general';
 
@@ -24,10 +24,10 @@ const CATEGORIES: {
   label: string;
   icon: React.ReactNode;
 }[] = [
-  { value: 'bug', label: 'Bug', icon: <Bug size={14} /> },
-  { value: 'feature', label: 'Feature idea', icon: <Lightbulb size={14} /> },
-  { value: 'general', label: 'General', icon: <MessageSquare size={14} /> },
-];
+    { value: 'bug', label: 'Bug', icon: <Bug size={14} /> },
+    { value: 'feature', label: 'Feature idea', icon: <Lightbulb size={14} /> },
+    { value: 'general', label: 'General', icon: <MessageSquare size={14} /> },
+  ];
 
 const MAX_MESSAGE = 1000;
 const MIN_MESSAGE = 5;
@@ -61,26 +61,23 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
 
   const { run: submit, isSaving } = useSaveAction(
     async () => {
-      if (!user) throw new Error('Not authenticated');
-
+      if (!user) throw new Error("Not authenticated");
       const trimmed = message.trim();
-      if (trimmed.length < MIN_MESSAGE) {
-        throw new Error('Message is too short.');
-      }
+      if (trimmed.length < MIN_MESSAGE) throw new Error("Message is too short.");
 
-      const { error } = await supabase.from('feedback').insert({
-        user_id: user.id,
-        user_email: user.email ?? null,
-        category,
-        message: trimmed,
-        page_url: window.location.href,
-        user_agent: navigator.userAgent,
+      await apiFetch("/api/feedback", {
+        method: "POST",
+        json: {
+          category,
+          message: trimmed,
+          pageUrl: window.location.href,
+          userAgent: navigator.userAgent,
+        },
       });
 
-      if (error) throw error;
       setSent(true);
     },
-    { cooldownMs: 800 }
+    { cooldownMs: 800 },
   );
 
   if (!isOpen) return null;
@@ -156,11 +153,10 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                       type="button"
                       onClick={() => !isSaving && setCategory(cat.value)}
                       disabled={isSaving}
-                      className={`flex flex-col items-center justify-center gap-1 py-3 rounded-lg border text-xs font-semibold transition-colors disabled:opacity-50 ${
-                        isActive
+                      className={`flex flex-col items-center justify-center gap-1 py-3 rounded-lg border text-xs font-semibold transition-colors disabled:opacity-50 ${isActive
                           ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                           : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
+                        }`}
                     >
                       {cat.icon}
                       {cat.label}
@@ -177,9 +173,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   Message
                 </label>
                 <span
-                  className={`text-[10px] font-medium tabular-nums ${
-                    remaining < 50 ? 'text-amber-600' : 'text-gray-400'
-                  }`}
+                  className={`text-[10px] font-medium tabular-nums ${remaining < 50 ? 'text-amber-600' : 'text-gray-400'
+                    }`}
                 >
                   {remaining} left
                 </span>
@@ -191,8 +186,8 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({
                   category === 'bug'
                     ? "What went wrong? What were you doing when it happened?"
                     : category === 'feature'
-                    ? "What would you like to see?"
-                    : "Tell us what's on your mind…"
+                      ? "What would you like to see?"
+                      : "Tell us what's on your mind…"
                 }
                 rows={6}
                 disabled={isSaving}

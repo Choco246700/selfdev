@@ -4,6 +4,14 @@ import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
+  },
   build: {
     rolldownOptions: {
       output: {
@@ -12,11 +20,6 @@ export default defineConfig({
             {
               name: 'vendor-react',
               test: /[\\/]node_modules[\\/](react|react-dom|react-router-dom)[\\/]/,
-              priority: 20,
-            },
-            {
-              name: 'vendor-supabase',
-              test: /[\\/]node_modules[\\/]@supabase[\\/]/,
               priority: 20,
             },
             {

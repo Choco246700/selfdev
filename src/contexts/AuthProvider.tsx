@@ -1,32 +1,41 @@
-import { useEffect, useState } from 'react';
-import type { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabaseClient';
-import { AuthContext } from './authContext';
+import { useCallback, useEffect, useState } from "react";
+import { AuthContext, type User } from "./authContext";
+import { apiFetch } from "../lib/api";
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const refreshUser = useCallback(async () => {
+    try {
+      const { user } = await apiFetch<{ user: User }>("/api/auth/me");
+      setUser(user);
+    } catch {
+      setUser(null);
+    }
+  }, []);
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    refreshUser().finally(() => setLoading(false));
+  }, [refreshUser]);
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+  const signIn = useCallback(async (email: string, password: string) => {
+    const { user } = await apiFetch<{ user: User }>("/api/auth/signin", {
+      method: "POST",
+      json: { email, password },
     });
+    setUser(user);
+  }, []);
 
-    return () => subscription.unsubscribe();
+  const signOut = useCallback(async () => {
+    await apiFetch("/api/auth/logout", { method: "POST" }).catch(() => {});
+    setUser(null);
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session, loading }}>
+    <AuthContext.Provider
+      value={{ user, loading, signIn, signOut, refreshUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

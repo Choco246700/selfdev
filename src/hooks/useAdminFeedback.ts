@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
-import { supabase } from '../lib/supabaseClient';
-import { useAuth } from '../hooks/useAuth';
+import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "./useAuth";
+import { apiFetch } from "../lib/api";
 
-export type FeedbackStatus = 'new' | 'read' | 'resolved' | 'wontfix';
+export type FeedbackStatus = "new" | "read" | "resolved" | "wontfix";
 
 export interface AdminFeedback {
   id: string;
@@ -17,32 +17,6 @@ export interface AdminFeedback {
   createdAt: string;
 }
 
-interface FeedbackRow {
-  id: string;
-  user_id: string | null;
-  user_email: string | null;
-  category: string;
-  message: string;
-  page_url: string | null;
-  user_agent: string | null;
-  status: string;
-  admin_notes: string | null;
-  created_at: string;
-}
-
-const toFeedback = (r: FeedbackRow): AdminFeedback => ({
-  id: r.id,
-  userId: r.user_id,
-  userEmail: r.user_email,
-  category: r.category,
-  message: r.message,
-  pageUrl: r.page_url,
-  userAgent: r.user_agent,
-  status: r.status as FeedbackStatus,
-  adminNotes: r.admin_notes,
-  createdAt: r.created_at,
-});
-
 export function useAdminFeedback(isAdmin: boolean) {
   const { user } = useAuth();
   const [items, setItems] = useState<AdminFeedback[]>([]);
@@ -51,15 +25,16 @@ export function useAdminFeedback(isAdmin: boolean) {
   const refresh = useCallback(async () => {
     if (!isAdmin || !user) return;
     setLoading(true);
-    const { data, error } = await supabase
-      .from('feedback')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setItems((data as FeedbackRow[]).map(toFeedback));
+    try {
+      const { feedback } = await apiFetch<{ feedback: AdminFeedback[] }>(
+        "/api/admin/feedback",
+      );
+      setItems(feedback);
+    } catch {
+      /* leave previous items intact */
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }, [isAdmin, user]);
 
   useEffect(() => {
@@ -68,37 +43,36 @@ export function useAdminFeedback(isAdmin: boolean) {
 
   const updateStatus = useCallback(
     async (id: string, status: FeedbackStatus) => {
-      setItems((prev) =>
-        prev.map((f) => (f.id === id ? { ...f, status } : f))
+      const prev = items;
+      setItems((curr) =>
+        curr.map((f) => (f.id === id ? { ...f, status } : f)),
       );
-      const { error } = await supabase
-        .from('feedback')
-        .update({ status })
-        .eq('id', id);
-      if (error) {
-        // Roll back
-        setItems((prev) => prev.map((f) => (f.id === id ? { ...f } : f)));
-        throw error;
+      try {
+        await apiFetch(`/api/admin/feedback/${id}`, {
+          method: "PATCH",
+          json: { status },
+        });
+      } catch (err) {
+        setItems(prev);
+        throw err;
       }
     },
-    []
+    [items],
   );
 
   const updateNotes = useCallback(async (id: string, notes: string) => {
-    setItems((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, adminNotes: notes } : f))
+    setItems((curr) =>
+      curr.map((f) => (f.id === id ? { ...f, adminNotes: notes } : f)),
     );
-    const { error } = await supabase
-      .from('feedback')
-      .update({ admin_notes: notes || null })
-      .eq('id', id);
-    if (error) throw error;
+    await apiFetch(`/api/admin/feedback/${id}`, {
+      method: "PATCH",
+      json: { adminNotes: notes || null },
+    });
   }, []);
 
   const deleteFeedback = useCallback(async (id: string) => {
-    setItems((prev) => prev.filter((f) => f.id !== id));
-    const { error } = await supabase.from('feedback').delete().eq('id', id);
-    if (error) throw error;
+    setItems((curr) => curr.filter((f) => f.id !== id));
+    await apiFetch(`/api/admin/feedback/${id}`, { method: "DELETE" });
   }, []);
 
   return { items, loading, refresh, updateStatus, updateNotes, deleteFeedback };

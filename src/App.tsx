@@ -3,10 +3,9 @@ import {
   Routes,
   Route,
   useNavigate,
-  useLocation,
   Navigate,
 } from 'react-router-dom';
-import type { User } from '@supabase/supabase-js';
+import type { User } from './contexts/authContext';
 import toast from 'react-hot-toast';
 import { Header } from './components/Header';
 import { MobileNav } from './components/MobileNav';
@@ -22,7 +21,7 @@ import { OfflineBanner } from './components/OfflineBanner';
 import { OnboardingTour } from './components/OnboardingTour';
 import { AdminGuard } from './components/AdminGuard';
 import { useAuth } from './hooks/useAuth';
-import { useSupabaseData } from './hooks/useSupabaseData';
+import { useData } from './hooks/useData';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useOnlineStatus } from './hooks/useOnlineStatus';
 import { usePendingQueue } from './hooks/usePendingQueue';
@@ -49,11 +48,11 @@ const SessionHistoryPage = lazy(() =>
     default: m.SessionHistoryPage,
   }))
 );
-const ResetPasswordPage = lazy(() =>
-  import('./pages/ResetPasswordPage').then((m) => ({
-    default: m.ResetPasswordPage,
-  }))
-);
+// const ResetPasswordPage = lazy(() =>
+//   import('./pages/ResetPasswordPage').then((m) => ({
+//     default: m.ResetPasswordPage,
+//   }))
+// );
 const SkillDetailPage = lazy(() =>
   import('./pages/SkillDetailPage').then((m) => ({
     default: m.SkillDetailPage,
@@ -66,20 +65,20 @@ const AdminPage = lazy(() =>
 // ─── Root: auth gate ─────────────────────────────────────────────────
 export default function App() {
   const { user, loading } = useAuth();
-  const location = useLocation();
+  // const location = useLocation();
 
   if (loading) {
     return <FullScreenLoader />;
   }
 
   // Password reset — always accessible, even when logged in
-  if (location.pathname === '/reset-password') {
-    return (
-      <Suspense fallback={<FullScreenLoader />}>
-        <ResetPasswordPage />
-      </Suspense>
-    );
-  }
+  // if (location.pathname === '/reset-password') {
+  //   return (
+  //     <Suspense fallback={<FullScreenLoader />}>
+  //       <ResetPasswordPage />
+  //     </Suspense>
+  //   );
+  // }
 
   // Logged in → straight to the app for any route
   if (user) {
@@ -91,8 +90,8 @@ export default function App() {
     <Suspense fallback={<FullScreenLoader />}>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/signin" element={<AuthPage initialMode="signin" />} />
-        <Route path="/signup" element={<AuthPage initialMode="signup" />} />
+        <Route path="/signin" element={<AuthPage />} />
+        <Route path="/signup" element={<AuthPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
@@ -119,7 +118,7 @@ function AppContent() {
     freezeHabit,
     deleteHabit,
     toggleHabit,
-  } = useSupabaseData();
+  } = useData();
 
   const { user } = useAuth();
 
@@ -549,22 +548,10 @@ const formattedDate = new Date().toLocaleDateString('en-US', {
  */
 function getDisplayName(user: User | null): string {
   if (!user) return 'there';
-
-  const meta = user.user_metadata as
-    | { full_name?: unknown; name?: unknown }
-    | undefined;
-
-  const fullName = meta?.full_name;
-  if (typeof fullName === 'string' && fullName.trim()) {
-    return fullName.trim();
+  if (user.fullName && user.fullName.trim()) {
+    return user.fullName.trim();
   }
-
-  const name = meta?.name;
-  if (typeof name === 'string' && name.trim()) {
-    return name.trim();
-  }
-
-  const prefix = (user.email ?? '').split('@')[0];
+  const prefix = user.email.split('@')[0];
   if (!prefix) return 'there';
   return prefix[0].toUpperCase() + prefix.slice(1);
 }

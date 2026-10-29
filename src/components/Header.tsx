@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { Wordmark } from "./Wordmark";
 import { useAuth } from "../hooks/useAuth";
-import { supabase } from "../lib/supabaseClient";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 
@@ -47,7 +46,7 @@ export const Header: React.FC<HeaderProps> = ({
   onExportHabitsCSV,
   onSendFeedback,
 }) => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -73,11 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   const handleLogout = async () => {
     setMenuOpen(false);
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Failed to sign out.");
-      return;
-    }
+    await signOut();
     toast.success("Signed out");
   };
 
@@ -86,12 +81,8 @@ export const Header: React.FC<HeaderProps> = ({
     fn?.();
   };
 
-  const userAvatar =
-    (user?.user_metadata?.avatar_url as string | undefined) ||
-    (user?.user_metadata?.picture as string | undefined);
-  const fullName =
-    (user?.user_metadata?.full_name as string | undefined) ||
-    (user?.user_metadata?.name as string | undefined);
+  const userAvatar = undefined;
+  const fullName = user?.fullName ?? undefined;
   const initials = getInitials(fullName || user?.email);
   const hasExportActions =
     Boolean(onExportJSON) ||
@@ -161,9 +152,8 @@ export const Header: React.FC<HeaderProps> = ({
             )}
             <ChevronDown
               size={12}
-              className={`text-gray-400 transition-transform ${
-                menuOpen ? "rotate-180" : ""
-              }`}
+              className={`text-gray-400 transition-transform ${menuOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
